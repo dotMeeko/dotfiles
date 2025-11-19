@@ -65,8 +65,3 @@ jobs:
           git add VERSION
           git commit -m "chore: bump version to ${{ steps.bump_version.outputs.new }} [skip ci]"
           git push
-
-      - name: Create git tag
-        run: |
-          git tag "v${{ steps.bump_version.outputs.new }}"
-          git push --tags
