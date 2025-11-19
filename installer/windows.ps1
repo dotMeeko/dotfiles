@@ -101,12 +101,24 @@ function Install-Package {
 
     try {
         $result = winget install --id $PackageId --silent --accept-package-agreements --accept-source-agreements 2>&1
+        $resultString = $result -join "`n"
 
-        if ($LASTEXITCODE -eq 0 -or $result -match "successfully installed" -or $result -match "already installed") {
-            Write-Success "$DisplayName installed successfully"
+        # Check for success indicators
+        if ($LASTEXITCODE -eq 0 -or
+            $resultString -match "successfully installed" -or
+            $resultString -match "already installed" -or
+            $resultString -match "No available upgrade found" -or
+            $resultString -match "Found an existing package already installed") {
+
+            if ($resultString -match "already installed" -or $resultString -match "Found an existing package") {
+                Write-Success "$DisplayName is already installed"
+            } else {
+                Write-Success "$DisplayName installed successfully"
+            }
             return $true
         } else {
             Write-Warning "$DisplayName installation returned code: $LASTEXITCODE"
+            Write-Host "  This may not be an error if the package is already installed" -ForegroundColor Gray
             return $false
         }
     }
@@ -162,24 +174,38 @@ function Test-CriticalDependencies {
     if (Test-CommandExists "python") {
         Write-Success "Python is available"
 
-        # Verify Python version
-        try {
-            $pythonVersion = python --version 2>&1
-            if ($pythonVersion -match "Python (\d+)\.(\d+)") {
-                $major = [int]$Matches[1]
-                $minor = [int]$Matches[2]
+        # Verify Python version (with retry for freshly installed Python)
+        $pythonVersion = $null
+        $maxRetries = 3
 
-                if (($major -eq 3 -and $minor -ge 8) -or ($major -gt 3)) {
-                    Write-Host "  Version: $pythonVersion" -ForegroundColor Gray
-                } else {
-                    Write-ErrorMsg "Python version is too old: $pythonVersion (need 3.8+)"
-                    $allGood = $false
-                    $missingDeps += "Python 3.8+"
+        for ($i = 0; $i -lt $maxRetries; $i++) {
+            try {
+                $pythonVersion = python --version 2>&1
+                if ($pythonVersion) {
+                    break
+                }
+            }
+            catch {
+                if ($i -lt $maxRetries - 1) {
+                    Start-Sleep -Milliseconds 500
                 }
             }
         }
-        catch {
-            Write-Warning "Could not verify Python version"
+
+        if ($pythonVersion -and $pythonVersion -match "Python (\d+)\.(\d+)") {
+            $major = [int]$Matches[1]
+            $minor = [int]$Matches[2]
+
+            if (($major -eq 3 -and $minor -ge 8) -or ($major -gt 3)) {
+                Write-Host "  Version: $pythonVersion" -ForegroundColor Gray
+            } else {
+                Write-ErrorMsg "Python version is too old: $pythonVersion (need 3.8+)"
+                $allGood = $false
+                $missingDeps += "Python 3.8+"
+            }
+        } else {
+            Write-Warning "Could not verify Python version (command available but no output)"
+            Write-Host "  Python command exists, assuming installation is correct" -ForegroundColor Gray
         }
     } else {
         Write-ErrorMsg "Python is not available"
@@ -240,7 +266,7 @@ function Test-CriticalDependencies {
 
         if ($missingDeps -contains "Python 3.8+") {
             Write-Host "  - Python: https://www.python.org/downloads/" -ForegroundColor Yellow
-            Write-Host "    Or run: winget install Python.Python.3" -ForegroundColor Cyan
+            Write-Host "    Or run: winget install Python.Python.3.13" -ForegroundColor Cyan
         }
 
         if ($missingDeps -contains "Git") {
@@ -294,7 +320,7 @@ try {
 
     $dependencies = @(
         @{ Id = "Git.Git"; Name = "Git" },
-        @{ Id = "Python.Python.3"; Name = "Python 3" }
+        @{ Id = "Python.Python.3.13"; Name = "Python 3.13" }
     )
 
     $failedPackages = @()
