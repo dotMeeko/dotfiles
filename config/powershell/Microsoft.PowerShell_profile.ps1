@@ -2,6 +2,9 @@
 # Author: Meeko
 # Location: $PROFILE
 
+# Clear PowerShell banner
+Clear-Host
+
 #region Environment Setup
 
 # Set dotfiles path
@@ -74,11 +77,12 @@ function Test-Administrator {
 # Display system info on startup
 function Show-SystemInfo {
     $isAdmin = Test-Administrator
-    $adminText = if ($isAdmin) { "Administrator" } else { "User" }
+    $currentUser = [System.Environment]::UserName
+    $roleText = if ($isAdmin) { "root" } else { $currentUser }
 
     Write-Host ""
     Write-Host "PowerShell $($PSVersionTable.PSVersion)" -ForegroundColor Cyan
-    Write-Host "Running as: $adminText" -ForegroundColor $(if ($isAdmin) { "Yellow" } else { "Green" })
+    Write-Host "Running as: $roleText" -ForegroundColor $(if ($isAdmin) { "Red" } else { "Green" })
     Write-Host "Dotfiles: $DOTFILES" -ForegroundColor Magenta
     Write-Host ""
 }
