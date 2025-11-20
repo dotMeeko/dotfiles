@@ -10,7 +10,24 @@
     - ~/Code
 
 - shell:
+    # Install applications via winget
+    - command: powershell -ExecutionPolicy Bypass -File scripts/windows/winget.ps1
+      description: Installing applications via winget
+      stdout: true
+      stderr: true
+
     # Configure Git for Windows (CRLF handling)
     - command: git config --global core.autocrlf true
       description: Configure Git line endings for Windows
       stdout: true
+
+- link:
+    # PowerShell Profile
+    ~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1:
+      path: config/powershell/Microsoft.PowerShell_profile.ps1
+      create: true
+
+    # Starship Config
+    ~/.config/starship.toml:
+      path: config/starship/starship.toml
+      create: true

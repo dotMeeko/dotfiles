@@ -188,6 +188,7 @@ try {
 
         $optionalTools = @(
             @{ Id = "Python.Python.3.13"; Name = "Python 3.13" }
+            @{ Id = "Starship.Starship"; Name = "Starship" }
         )
 
         $failedOptional = @()
