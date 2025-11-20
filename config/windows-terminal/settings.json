@@ -17,7 +17,8 @@
             "cursorShape": "bar",
             "antialiasingMode": "cleartype",
             "padding": "4, 4, 4, 4"
-        }
+        },
+        "list": []
     },
     "schemes": [
         {
