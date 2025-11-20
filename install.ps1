@@ -1,7 +1,6 @@
 # Windows dotfiles installer
 # This script runs Dotbot to install dotfiles on Windows
 
-[CmdletBinding()]
 param()
 
 $ErrorActionPreference = 'Stop'
@@ -53,7 +52,7 @@ Write-Host ""
 try {
     $dotbotBin = Join-Path $DOTBOT_DIR "bin" "dotbot"
 
-    & python "$dotbotBin" -d "$BASEDIR" -c "$configPath" @args
+    & python "$dotbotBin" -d "$BASEDIR" -c "$configPath"
 
     if ($LASTEXITCODE -eq 0) {
         Write-Host ""
