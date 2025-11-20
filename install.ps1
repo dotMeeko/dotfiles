@@ -6,7 +6,7 @@ param()
 $ErrorActionPreference = 'Stop'
 
 $BASEDIR = $PSScriptRoot
-$DOTBOT_DIR = Join-Path $BASEDIR "core" "dotbot"
+$DOTBOT_DIR = Join-Path (Join-Path $BASEDIR "core") "dotbot"
 $CONFIG = "install.conf.windows.yaml"
 
 Write-Host "Installing dotfiles for Windows..." -ForegroundColor Cyan
