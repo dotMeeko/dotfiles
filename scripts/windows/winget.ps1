@@ -199,7 +199,7 @@ try {
             @{ Id = "Valve.Steam"; Name = "Steam" }
 
             # Messangers
-            @{ Id = "Discord.Discord "; Name = "Discord" }
+            @{ Id = "Discord.Discord"; Name = "Discord" }
             @{ Id = "Telegram.TelegramDesktop"; Name = "Telegram" }
 
             # Utils
