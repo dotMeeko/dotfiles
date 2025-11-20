@@ -19,7 +19,7 @@ if (-not (Test-Path (Join-Path $DOTBOT_DIR "bin" "dotbot"))) {
 
     try {
         Set-Location $BASEDIR
-        git submodule update --init --recursive $DOTBOT_DIR
+        & git submodule update --init --recursive "$DOTBOT_DIR"
         Write-Host "[OK] Dotbot submodule initialized" -ForegroundColor Green
     }
     catch {
@@ -53,7 +53,7 @@ Write-Host ""
 try {
     $dotbotBin = Join-Path $DOTBOT_DIR "bin" "dotbot"
 
-    python $dotbotBin -d $BASEDIR -c $configPath @args
+    & python "$dotbotBin" -d "$BASEDIR" -c "$configPath" @args
 
     if ($LASTEXITCODE -eq 0) {
         Write-Host ""
