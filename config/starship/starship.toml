@@ -1,86 +1,77 @@
-# Starship Prompt Configuration
-# https://starship.rs/config/
+# Starship Jetpack Preset
+# https://starship.rs/presets/jetpack
 
-# Get editor completions based on the config schema
-"$schema" = 'https://starship.rs/config-schema.json'
-
-# Inserts a blank line between shell prompts
-add_newline = true
-
-# Timeout for commands executed by starship (milliseconds)
-command_timeout = 500
-
-# Change command prompt format
 format = """
-[┌───────────────────────────────────────────>](bold green)
-[│](bold green)$directory$git_branch$git_status
-[└─>](bold green) """
+[░▒▓](#a3aed2)\
+[  ](bg:#a3aed2 fg:#090c0c)\
+[](bg:#769ff0 fg:#a3aed2)\
+$directory\
+[](fg:#769ff0 bg:#394260)\
+$git_branch\
+$git_status\
+[](fg:#394260 bg:#212736)\
+$nodejs\
+$rust\
+$golang\
+$php\
+$python\
+[](fg:#212736 bg:#1d2230)\
+$time\
+[ ](fg:#1d2230)\
+\n$character"""
 
-# Character module (the prompt symbol)
-[character]
-success_symbol = "[➜](bold green)"
-error_symbol = "[➜](bold red)"
-
-# Directory module
 [directory]
+style = "fg:#e3e5e5 bg:#769ff0"
+format = "[ $path ]($style)"
 truncation_length = 3
-truncate_to_repo = true
-format = "[$path]($style)[$read_only]($read_only_style) "
-style = "bold cyan"
-read_only = " 🔒"
+truncation_symbol = "…/"
 
-# Git Branch module
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
 [git_branch]
-symbol = " "
-format = "on [$symbol$branch]($style) "
-style = "bold purple"
+symbol = ""
+style = "bg:#394260"
+format = '[[ $symbol $branch ](fg:#769ff0 bg:#394260)]($style)'
 
-# Git Status module
 [git_status]
-format = '([\[$all_status$ahead_behind\]]($style) )'
-style = "bold red"
-conflicted = "🏳"
-ahead = "⇡${count}"
-behind = "⇣${count}"
-diverged = "⇕⇡${ahead_count}⇣${behind_count}"
-untracked = "🤷"
-stashed = "📦"
-modified = "📝"
-staged = '[++\($count\)](green)'
-renamed = "👅"
-deleted = "🗑"
+style = "bg:#394260"
+format = '[[($all_status$ahead_behind )](fg:#769ff0 bg:#394260)]($style)'
 
-# Language modules
 [nodejs]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-
-[python]
-symbol = " "
-format = 'via [${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [rust]
-symbol = " "
-format = "via [$symbol($version )]($style)"
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [golang]
-symbol = " "
-format = "via [$symbol($version )]($style)"
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
-[package]
-symbol = " "
-format = "is [$symbol$version]($style) "
+[php]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
-# Time module (disabled by default)
+[python]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
 [time]
-disabled = true
-format = '🕙[\[ $time \]]($style) '
-time_format = "%T"
-
-# Username module
-[username]
-style_user = "bold yellow"
-style_root = "bold red"
-format = "[$user]($style) "
 disabled = false
-show_always = false
+time_format = "%R"
+style = "bg:#1d2230"
+format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+
+[character]
+success_symbol = '[](bold fg:#769ff0)'
+error_symbol = '[](bold fg:#e06c75)'

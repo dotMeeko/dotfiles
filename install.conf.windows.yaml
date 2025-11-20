@@ -16,6 +16,12 @@
       stdout: true
       stderr: true
 
+    # Install Nerd Fonts via Chocolatey (requires Admin)
+    - command: powershell -ExecutionPolicy Bypass -File scripts/windows/choco.ps1
+      description: Installing Nerd Fonts via Chocolatey
+      stdout: true
+      stderr: true
+
     # Configure Git for Windows (CRLF handling)
     - command: git config --global core.autocrlf true
       description: Configure Git line endings for Windows
@@ -37,3 +43,9 @@
     ~/.config/starship.toml:
       path: config/starship/starship.toml
       create: true
+
+    # Windows Terminal Settings
+    ~/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json:
+      path: config/windows-terminal/settings.json
+      create: true
+      force: true
