@@ -20,10 +20,10 @@ if (-not (Test-Path (Join-Path $DOTBOT_DIR "bin" "dotbot"))) {
     try {
         Set-Location $BASEDIR
         git submodule update --init --recursive $DOTBOT_DIR
-        Write-Host "✓ Dotbot submodule initialized" -ForegroundColor Green
+        Write-Host "[OK] Dotbot submodule initialized" -ForegroundColor Green
     }
     catch {
-        Write-Host "✗ Failed to initialize Dotbot submodule" -ForegroundColor Red
+        Write-Host "[ERROR] Failed to initialize Dotbot submodule" -ForegroundColor Red
         Write-Host "  Error: $_" -ForegroundColor Red
         exit 1
     }
@@ -33,7 +33,7 @@ if (-not (Test-Path (Join-Path $DOTBOT_DIR "bin" "dotbot"))) {
 
 # Check if Python is available
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
-    Write-Host "✗ Python is not available" -ForegroundColor Red
+    Write-Host "[ERROR] Python is not available" -ForegroundColor Red
     Write-Host "  Please install Python 3.8+ first" -ForegroundColor Yellow
     Write-Host "  Run: irm https://raw.githubusercontent.com/dotMeeko/dotfiles/main/installer/windows.ps1 | iex" -ForegroundColor Cyan
     exit 1
@@ -42,7 +42,7 @@ if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
 # Check if config file exists
 $configPath = Join-Path $BASEDIR $CONFIG
 if (-not (Test-Path $configPath)) {
-    Write-Host "✗ Configuration file not found: $CONFIG" -ForegroundColor Red
+    Write-Host "[ERROR] Configuration file not found: $CONFIG" -ForegroundColor Red
     exit 1
 }
 
@@ -57,17 +57,17 @@ try {
 
     if ($LASTEXITCODE -eq 0) {
         Write-Host ""
-        Write-Host "✓ Dotfiles installed successfully!" -ForegroundColor Green
+        Write-Host "[OK] Dotfiles installed successfully!" -ForegroundColor Green
     }
     else {
         Write-Host ""
-        Write-Host "✗ Dotbot returned exit code: $LASTEXITCODE" -ForegroundColor Red
+        Write-Host "[ERROR] Dotbot returned exit code: $LASTEXITCODE" -ForegroundColor Red
         exit $LASTEXITCODE
     }
 }
 catch {
     Write-Host ""
-    Write-Host "✗ Failed to run Dotbot" -ForegroundColor Red
+    Write-Host "[ERROR] Failed to run Dotbot" -ForegroundColor Red
     Write-Host "  Error: $_" -ForegroundColor Red
     exit 1
 }
