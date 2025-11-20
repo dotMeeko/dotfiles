@@ -14,8 +14,3 @@
     - command: git config --global core.autocrlf true
       description: Configure Git line endings for Windows
       stdout: true
-
-    # Set default Git editor (if not set)
-    - command: git config --global core.editor "code --wait" 2>/dev/null || true
-      description: Set VS Code as default Git editor
-      stdout: true
