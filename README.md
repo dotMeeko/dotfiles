@@ -1,26 +1,19 @@
 # Dotfiles
 
-Personal dotfiles repository using [Dotbot](https://github.com/anishathalye/dotbot) for cross-platform configuration management.
+Personal dotfiles using [Dotbot](https://github.com/anishathalye/dotbot) for cross-platform configuration management.
 
 ## Quick Start
 
-### Windows
+```bash
+# Clone repository
+git clone --recurse-submodules https://github.com/dotMeeko/dotfiles.git ~/.dotfiles
 
-**1. Install dependencies** (requires Administrator):
-
-```powershell
-irm https://raw.githubusercontent.com/dotMeeko/dotfiles/main/installer/windows.ps1 | iex
+# Install dotfiles
+cd ~/.dotfiles
+./install      # Linux/macOS
+.\install.ps1  # Windows
 ```
 
-This installs:
-- Python 3.*
-- Git
-- Developer Mode (for symbolic links)
+## Platform-Specific Guides
 
-**2. Clone and install dotfiles:**
-
-```powershell
-git clone --recurse-submodules https://github.com/dotMeeko/dotfiles.git
-cd dotfiles
-.\install.ps1
-```
+- **[Windows Installation Guide](docs/windows/installation.md)** - Complete setup for Windows 11
