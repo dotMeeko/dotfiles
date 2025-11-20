@@ -378,12 +378,32 @@ try {
     Write-Host "  ✓ Python 3.8+" -ForegroundColor White
     Write-Host "  ✓ Developer Mode (symbolic links)" -ForegroundColor White
     Write-Host ""
+    # Enable script execution for CurrentUser
+    Write-Host ""
+    Write-Step "Configuring PowerShell execution policy..."
+
+    try {
+        $currentPolicy = Get-ExecutionPolicy -Scope CurrentUser
+        if ($currentPolicy -eq "Restricted" -or $currentPolicy -eq "Undefined") {
+            Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+            Write-Success "PowerShell execution policy set to RemoteSigned"
+            Write-Host "  Scripts can now run without blocking" -ForegroundColor Gray
+        } else {
+            Write-Success "PowerShell execution policy already configured ($currentPolicy)"
+        }
+    }
+    catch {
+        Write-Warning "Could not set execution policy automatically"
+        Write-Host "  You may need to run manually: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned" -ForegroundColor Yellow
+    }
+
+    Write-Host ""
     Write-Host "Next steps:" -ForegroundColor Cyan
     Write-Host "  1. Restart your terminal to load new PATH" -ForegroundColor White
-    Write-Host "  2. Initialize submodules: " -ForegroundColor White -NoNewline
-    Write-Host "git submodule update --init --recursive" -ForegroundColor Yellow
-    Write-Host "  3. Run dotbot installer: " -ForegroundColor White -NoNewline
-    Write-Host "./install" -ForegroundColor Yellow
+    Write-Host "  2. Clone dotfiles: " -ForegroundColor White -NoNewline
+    Write-Host "git clone --recurse-submodules https://github.com/dotMeeko/dotfiles.git" -ForegroundColor Yellow
+    Write-Host "  3. Run installer: " -ForegroundColor White -NoNewline
+    Write-Host "cd dotfiles && .\install.ps1" -ForegroundColor Yellow
     Write-Host ""
 
 }
