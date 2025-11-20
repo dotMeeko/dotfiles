@@ -188,7 +188,22 @@ try {
 
         $optionalTools = @(
             @{ Id = "Python.Python.3.13"; Name = "Python 3.13" }
+
+            # Terminal
             @{ Id = "Starship.Starship"; Name = "Starship" }
+
+            # Browsers
+            @{ Id = "Google.Chrome"; Name = "Google Chrome" }
+
+            # Games
+            @{ Id = "Valve.Steam"; Name = "Steam" }
+
+            # Messangers
+            @{ Id = "Discord.Discord "; Name = "Discord" }
+            @{ Id = "Telegram.TelegramDesktop"; Name = "Telegram" }
+
+            # Utils
+            @{ Id = "DeepCool.DeepCool"; Name = "DeepCool" }
         )
 
         $failedOptional = @()
