@@ -1,2 +1,9 @@
 # Code editors
 .idea
+
+# AI assistants
+.claude
+CLAUDE.md
+
+# TODO
+TODO.md

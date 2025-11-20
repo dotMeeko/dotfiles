@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Unix/Linux/macOS dotfiles installer
+# This script runs Dotbot to install dotfiles with OS-specific configuration
+
+set -e
+
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTBOT_DIR="core/dotbot"
+
+# Detect operating system
+OS="$(uname)"
+
+case "$OS" in
+    Darwin)
+        CONFIG="install.conf.macos.yaml"
+        OS_NAME="macOS"
+        ;;
+    Linux)
+        CONFIG="install.conf.linux.yaml"
+        OS_NAME="Linux"
+        ;;
+    *)
+        echo "Unsupported operating system: $OS"
+        exit 1
+        ;;
+esac
+
+echo "Installing dotfiles for $OS_NAME..."
+echo ""
+
+# Check if dotbot submodule exists
+if [ ! -f "${BASEDIR}/${DOTBOT_DIR}/bin/dotbot" ]; then
+    echo "Initializing Dotbot submodule..."
+    cd "${BASEDIR}"
+    git submodule update --init --recursive "${DOTBOT_DIR}"
+    echo "✓ Dotbot submodule initialized"
+    echo ""
+fi
+
+# Check if config file exists
+if [ ! -f "${BASEDIR}/${CONFIG}" ]; then
+    echo "✗ Configuration file not found: ${CONFIG}"
+    exit 1
+fi
+
+echo "Running Dotbot with configuration: ${CONFIG}"
+echo ""
+
+# Run Dotbot
+"${BASEDIR}/${DOTBOT_DIR}/bin/dotbot" -d "${BASEDIR}" -c "${CONFIG}" "${@}"
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✓ Dotfiles installed successfully!"
+else
+    echo ""
+    echo "✗ Dotbot returned exit code: $?"
+    exit 1
+fi

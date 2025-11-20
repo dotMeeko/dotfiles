@@ -1,25 +1,26 @@
 # Dotfiles
 
-Personal dotfiles repository.
+Personal dotfiles repository using [Dotbot](https://github.com/anishathalye/dotbot) for cross-platform configuration management.
 
 ## Quick Start
 
 ### Windows
 
-Install dependencies automatically (requires Administrator):
+**1. Install dependencies** (requires Administrator):
 
 ```powershell
 irm https://raw.githubusercontent.com/dotMeeko/dotfiles/main/installer/windows.ps1 | iex
 ```
 
-This will install:
-- Python 3.+
+This installs:
+- Python 3.*
 - Git
-- Enable Developer Mode (for symbolic links)
+- Developer Mode (for symbolic links)
 
-Then clone the repository:
+**2. Clone and install dotfiles:**
 
 ```powershell
 git clone --recurse-submodules https://github.com/dotMeeko/dotfiles.git
+cd dotfiles
+.\install.ps1
 ```
-

@@ -1,0 +1,21 @@
+# Configuration for Windows
+- defaults:
+    link:
+      relink: true      # Replace existing symlinks
+      create: true      # Create parent directories if needed
+
+- clean: ['~']          # Remove broken symlinks in home directory
+
+- create:
+    - ~/Code
+
+- shell:
+    # Configure Git for Windows (CRLF handling)
+    - command: git config --global core.autocrlf true
+      description: Configure Git line endings for Windows
+      stdout: true
+
+    # Set default Git editor (if not set)
+    - command: git config --global core.editor "code --wait" 2>/dev/null || true
+      description: Set VS Code as default Git editor
+      stdout: true
