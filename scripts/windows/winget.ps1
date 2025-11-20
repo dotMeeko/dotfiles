@@ -145,7 +145,7 @@ try {
     Write-Host ""
 
     $essentialTools = @(
-        @{ Id = "Git.Git"; Name = "Git" },
+        @{ Id = "Git.Git"; Name = "Git" }
     )
 
     $failedEssential = @()
@@ -164,7 +164,7 @@ try {
         Write-Host ""
 
         $optionalTools = @(
-            @{ Id = "Python.Python.3.13"; Name = "Python 3.13" },
+            @{ Id = "Python.Python.3.13"; Name = "Python 3.13" }
         )
 
         $failedOptional = @()
