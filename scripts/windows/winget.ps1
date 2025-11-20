@@ -146,9 +146,6 @@ try {
 
     $essentialTools = @(
         @{ Id = "Git.Git"; Name = "Git" },
-        @{ Id = "Microsoft.VisualStudioCode"; Name = "Visual Studio Code" },
-        @{ Id = "Microsoft.WindowsTerminal"; Name = "Windows Terminal" },
-        @{ Id = "Microsoft.PowerShell"; Name = "PowerShell 7" }
     )
 
     $failedEssential = @()
