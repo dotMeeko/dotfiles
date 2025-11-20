@@ -7,9 +7,13 @@
     "profiles": {
         "defaults": {
             "font": {
-                "face": "JetBrainsMono Nerd Font",
+                "face": "JetBrainsMono Nerd Font Mono",
                 "size": 11,
-                "weight": "normal"
+                "weight": "normal",
+                "features": {
+                    "calt": 1,
+                    "liga": 1
+                }
             },
             "opacity": 85,
             "useAcrylic": true,
