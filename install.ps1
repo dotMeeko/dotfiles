@@ -6,14 +6,14 @@ param()
 $ErrorActionPreference = 'Stop'
 
 $BASEDIR = $PSScriptRoot
-$DOTBOT_DIR = Join-Path -Path $BASEDIR -ChildPath "core" -AdditionalChildPath "dotbot"
+$DOTBOT_DIR = Join-Path -Path (Join-Path -Path $BASEDIR -ChildPath "core") -ChildPath "dotbot"
 $CONFIG = "install.conf.windows.yaml"
 
 Write-Host "Installing dotfiles for Windows..." -ForegroundColor Cyan
 Write-Host ""
 
 # Check if dotbot submodule exists
-if (-not (Test-Path (Join-Path -Path $DOTBOT_DIR -ChildPath "bin" -AdditionalChildPath "dotbot"))) {
+if (-not (Test-Path (Join-Path -Path (Join-Path -Path $DOTBOT_DIR -ChildPath "bin") -ChildPath "dotbot"))) {
     Write-Host "Initializing Dotbot submodule..." -ForegroundColor Yellow
 
     try {
@@ -50,7 +50,7 @@ Write-Host ""
 
 # Run Dotbot
 try {
-    $dotbotBin = Join-Path -Path $DOTBOT_DIR -ChildPath "bin" -AdditionalChildPath "dotbot"
+    $dotbotBin = Join-Path -Path (Join-Path -Path $DOTBOT_DIR -ChildPath "bin") -ChildPath "dotbot"
 
     & python "$dotbotBin" -d "$BASEDIR" -c "$configPath"
 
