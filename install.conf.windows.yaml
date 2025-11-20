@@ -22,10 +22,16 @@
       stdout: true
 
 - link:
-    # PowerShell Profile
+    # PowerShell 5.1 Profile (Windows default)
+    ~/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1:
+      path: config/powershell/Microsoft.PowerShell_profile.ps1
+      create: true
+
+    # PowerShell 7 Profile (if installed)
     ~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1:
       path: config/powershell/Microsoft.PowerShell_profile.ps1
       create: true
+      ignore-missing: true
 
     # Starship Config
     ~/.config/starship.toml:
