@@ -201,6 +201,7 @@ try {
             # Messangers
             @{ Id = "Discord.Discord"; Name = "Discord" }
             @{ Id = "Telegram.TelegramDesktop"; Name = "Telegram" }
+            @{ Id = "9NKSQGP7F2NH"; Name = "WhatsApp" }
 
             # Utils
             @{ Id = "DeepCool.DeepCool"; Name = "DeepCool" }
