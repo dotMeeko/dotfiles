@@ -94,14 +94,36 @@ function Install-WingetPackage {
             $result = winget $command --id $PackageId --silent --accept-package-agreements --accept-source-agreements 2>&1
             $resultString = $result -join "`n"
 
-            if ($LASTEXITCODE -eq 0 -or
-                $resultString -match "successfully installed" -or
-                $resultString -match "successfully upgraded" -or
-                $resultString -match "already installed" -or
-                $resultString -match "No available upgrade found" -or
-                $resultString -match "Found an existing package already installed") {
+            $isSuccess = $false
+            if ($LASTEXITCODE -eq 0) {
+                $isSuccess = $true
+            }
+            if ($resultString -match "successfully installed") {
+                $isSuccess = $true
+            }
+            if ($resultString -match "successfully upgraded") {
+                $isSuccess = $true
+            }
+            if ($resultString -match "already installed") {
+                $isSuccess = $true
+            }
+            if ($resultString -match "No available upgrade found") {
+                $isSuccess = $true
+            }
+            if ($resultString -match "Found an existing package already installed") {
+                $isSuccess = $true
+            }
 
-                if ($resultString -match "already installed" -or $resultString -match "No available upgrade") {
+            if ($isSuccess) {
+                $isAlreadyUpToDate = $false
+                if ($resultString -match "already installed") {
+                    $isAlreadyUpToDate = $true
+                }
+                if ($resultString -match "No available upgrade") {
+                    $isAlreadyUpToDate = $true
+                }
+
+                if ($isAlreadyUpToDate) {
                     Write-Success "$DisplayName is already up to date"
                 } else {
                     Write-Success "$DisplayName completed successfully"
@@ -193,9 +215,11 @@ try {
         Write-Host ""
     }
 
-    if (-not $SkipOptional -and $failedOptional.Count -gt 0) {
-        Write-Host "Failed optional tools: $($failedOptional -join ', ')" -ForegroundColor Gray
-        Write-Host ""
+    if (-not $SkipOptional) {
+        if ($failedOptional.Count -gt 0) {
+            Write-Host "Failed optional tools: $($failedOptional -join ', ')" -ForegroundColor Gray
+            Write-Host ""
+        }
     }
 
     Write-Host "Restart your terminal to use newly installed tools" -ForegroundColor Cyan
