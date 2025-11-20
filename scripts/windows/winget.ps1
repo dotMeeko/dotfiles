@@ -205,7 +205,6 @@ try {
 
             # Utils
             @{ Id = "DeepCool.DeepCool"; Name = "DeepCool" }
-            @{ Id = "RamenSoftware.Windhawk"; Name = "Windhawk" }
         )
 
         $failedOptional = @()

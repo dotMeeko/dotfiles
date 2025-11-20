@@ -199,6 +199,7 @@ try {
         @{ Id = "nerd-fonts-hack"; Name = "Hack Nerd Font" }
         @{ Id = "nerd-fonts-firacode"; Name = "FiraCode Nerd Font" }
         @{ Id = "nerd-fonts-jetbrainsmono"; Name = "JetBrainsMono Nerd Font" }
+        @{ Id = "windhawk"; Name = "Windhawk" }
     )
 
     $failed = @()
