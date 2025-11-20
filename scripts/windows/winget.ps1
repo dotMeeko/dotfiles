@@ -43,19 +43,19 @@ function Write-Step {
 
 function Write-Success {
     param([string]$Message)
-    Write-Host "✓" -ForegroundColor Green -NoNewline
+    Write-Host "V" -ForegroundColor Green -NoNewline
     Write-Host " $Message" -ForegroundColor White
 }
 
 function Write-Warning {
     param([string]$Message)
-    Write-Host "⚠" -ForegroundColor Yellow -NoNewline
+    Write-Host "!" -ForegroundColor Yellow -NoNewline
     Write-Host " $Message" -ForegroundColor Yellow
 }
 
 function Write-ErrorMsg {
     param([string]$Message)
-    Write-Host "✗" -ForegroundColor Red -NoNewline
+    Write-Host "X" -ForegroundColor Red -NoNewline
     Write-Host " $Message" -ForegroundColor Red
 }
 
@@ -135,7 +135,8 @@ function Install-WingetPackage {
             }
         }
         catch {
-            Write-ErrorMsg "Failed: $($_.Exception.Message)"
+            $errorMessage = $_.Exception.Message
+            Write-ErrorMsg "Failed: $errorMessage"
             Write-Verbose "Stack trace: $($_.ScriptStackTrace)"
             return $false
         }
@@ -228,7 +229,8 @@ try {
 }
 catch {
     Write-Host ""
-    Write-ErrorMsg "Script failed: $($_.Exception.Message)"
+    $errorMessage = $_.Exception.Message
+    Write-ErrorMsg "Script failed: $errorMessage"
     exit 1
 }
 
