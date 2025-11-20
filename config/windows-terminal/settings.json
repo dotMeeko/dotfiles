@@ -11,11 +11,13 @@
                 "size": 11,
                 "weight": "normal"
             },
-            "opacity": 95,
-            "useAcrylic": false,
-            "colorScheme": "One Half Dark",
+            "opacity": 85,
+            "useAcrylic": true,
+            "acrylicOpacity": 0.85,
+            "colorScheme": "Catppuccin Mocha",
             "cursorShape": "bar",
-            "antialiasingMode": "cleartype"
+            "antialiasingMode": "cleartype",
+            "padding": "8, 8, 8, 8"
         },
         "list": [
             {
@@ -23,7 +25,8 @@
                 "name": "Windows PowerShell",
                 "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
                 "hidden": false,
-                "startingDirectory": "%USERPROFILE%"
+                "startingDirectory": "%USERPROFILE%",
+                "icon": "ms-appx:///ProfileIcons/{61c54bbd-c2c6-5271-96e7-009a87ff44bf}.png"
             },
             {
                 "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
@@ -48,27 +51,96 @@
     },
     "schemes": [
         {
-            "name": "One Half Dark",
-            "black": "#282c34",
-            "red": "#e06c75",
-            "green": "#98c379",
-            "yellow": "#e5c07b",
-            "blue": "#61afef",
-            "purple": "#c678dd",
-            "cyan": "#56b6c2",
-            "white": "#dcdfe4",
-            "brightBlack": "#5a6374",
-            "brightRed": "#e06c75",
-            "brightGreen": "#98c379",
-            "brightYellow": "#e5c07b",
-            "brightBlue": "#61afef",
-            "brightPurple": "#c678dd",
-            "brightCyan": "#56b6c2",
-            "brightWhite": "#dcdfe4",
-            "background": "#282c34",
-            "foreground": "#dcdfe4",
-            "selectionBackground": "#3e4451",
-            "cursorColor": "#dcdfe4"
+            "name": "Catppuccin Mocha",
+            "black": "#45475A",
+            "red": "#F38BA8",
+            "green": "#A6E3A1",
+            "yellow": "#F9E2AF",
+            "blue": "#89B4FA",
+            "purple": "#F5C2E7",
+            "cyan": "#94E2D5",
+            "white": "#BAC2DE",
+            "brightBlack": "#585B70",
+            "brightRed": "#F38BA8",
+            "brightGreen": "#A6E3A1",
+            "brightYellow": "#F9E2AF",
+            "brightBlue": "#89B4FA",
+            "brightPurple": "#F5C2E7",
+            "brightCyan": "#94E2D5",
+            "brightWhite": "#A6ADC8",
+            "background": "#1E1E2E",
+            "foreground": "#CDD6F4",
+            "selectionBackground": "#585B70",
+            "cursorColor": "#F5E0DC"
+        },
+        {
+            "name": "Catppuccin Macchiato",
+            "black": "#494D64",
+            "red": "#ED8796",
+            "green": "#A6DA95",
+            "yellow": "#EED49F",
+            "blue": "#8AADF4",
+            "purple": "#F5BDE6",
+            "cyan": "#8BD5CA",
+            "white": "#B8C0E0",
+            "brightBlack": "#5B6078",
+            "brightRed": "#ED8796",
+            "brightGreen": "#A6DA95",
+            "brightYellow": "#EED49F",
+            "brightBlue": "#8AADF4",
+            "brightPurple": "#F5BDE6",
+            "brightCyan": "#8BD5CA",
+            "brightWhite": "#A5ADCB",
+            "background": "#24273A",
+            "foreground": "#CAD3F5",
+            "selectionBackground": "#5B6078",
+            "cursorColor": "#F4DBD6"
+        },
+        {
+            "name": "Catppuccin Frappe",
+            "black": "#51576D",
+            "red": "#E78284",
+            "green": "#A6D189",
+            "yellow": "#E5C890",
+            "blue": "#8CAAEE",
+            "purple": "#F4B8E4",
+            "cyan": "#81C8BE",
+            "white": "#B5BFE2",
+            "brightBlack": "#626880",
+            "brightRed": "#E78284",
+            "brightGreen": "#A6D189",
+            "brightYellow": "#E5C890",
+            "brightBlue": "#8CAAEE",
+            "brightPurple": "#F4B8E4",
+            "brightCyan": "#81C8BE",
+            "brightWhite": "#A5ADCE",
+            "background": "#303446",
+            "foreground": "#C6D0F5",
+            "selectionBackground": "#626880",
+            "cursorColor": "#F2D5CF"
+        },
+        {
+            "name": "Catppuccin Latte",
+            "black": "#5C5F77",
+            "red": "#D20F39",
+            "green": "#40A02B",
+            "yellow": "#DF8E1D",
+            "blue": "#1E66F5",
+            "purple": "#EA76CB",
+            "cyan": "#179299",
+            "white": "#ACB0BE",
+            "brightBlack": "#6C6F85",
+            "brightRed": "#D20F39",
+            "brightGreen": "#40A02B",
+            "brightYellow": "#DF8E1D",
+            "brightBlue": "#1E66F5",
+            "brightPurple": "#EA76CB",
+            "brightCyan": "#179299",
+            "brightWhite": "#BCC0CC",
+            "background": "#EFF1F5",
+            "foreground": "#4C4F69",
+            "selectionBackground": "#ACB0BE",
+            "cursorColor": "#DC8A78"
         }
     ],
     "actions": [
@@ -94,6 +166,27 @@
                 "splitMode": "duplicate"
             },
             "keys": "alt+shift+d"
+        },
+        {
+            "command": {
+                "action": "newTab"
+            },
+            "keys": "ctrl+shift+t"
+        },
+        {
+            "command": {
+                "action": "closeTab"
+            },
+            "keys": "ctrl+shift+w"
+        },
+        {
+            "command": "toggleFocusMode",
+            "keys": "ctrl+shift+p"
         }
-    ]
+    ],
+    "theme": "dark",
+    "launchMode": "default",
+    "startOnUserLogin": false,
+    "confirmCloseAllTabs": true,
+    "windowingBehavior": "useAnyExisting"
 }
