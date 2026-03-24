@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Runs before `git push`: bumps PATCH in VERSION and commits.
+#
+# Install once per clone: ./scripts/git/install-git-hooks.sh
+#
+# Skip: SKIP_VERSION_BUMP=1 git push ...
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+if [ "${SKIP_VERSION_BUMP:-}" = "1" ]; then
+  exit 0
+fi
+
+# Avoid bumping again when the tip is already a version bump commit
+if git log -1 --pretty=%B 2>/dev/null | grep -q '\[skip ci\]'; then
+  exit 0
+fi
+
+NEW_VERSION="$("$ROOT/scripts/git/bump-version.sh")"
+git add VERSION
+
+if git diff --cached --quiet; then
+  exit 0
+fi
+
+git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]" --no-verify
+exit 0
