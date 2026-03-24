@@ -11,5 +11,5 @@ cd "$ROOT"
 git config core.hooksPath .githooks
 echo "core.hooksPath set to .githooks (this repository only)"
 
-chmod +x .githooks/pre-push 2>/dev/null || true
-echo "Hook: pre-push (PATCH bump before push)"
+chmod +x .githooks/pre-push scripts/git/bump-version.sh scripts/git/install-git-hooks.sh 2>/dev/null || true
+echo "Hooks: pre-push (PATCH bump before push). Ensure your Git client runs hooks (do not use push with hooks disabled)."

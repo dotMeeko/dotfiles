@@ -13,3 +13,5 @@ Then use **`git push`** as usual. **`VERSION`** is one line: `MAJOR.MINOR.PATCH`
 - **PATCH** — small fixes (bumped automatically on each push here)
 
 Change **MAJOR** / **MINOR** in `VERSION` yourself when you need to.
+
+**If PATCH doesn’t bump:** check `git config core.hooksPath` prints `.githooks`. Push from a terminal (some IDEs use **push without hooks**). You need a **new** commit on top of the last auto bump—pushing again with nothing new only uploads the pending bump commit.

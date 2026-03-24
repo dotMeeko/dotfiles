@@ -13,10 +13,13 @@ if [ "${SKIP_VERSION_BUMP:-}" = "1" ]; then
   exit 0
 fi
 
-# Avoid bumping again when the tip is already a version bump commit
-if git log -1 --pretty=%B 2>/dev/null | grep -q '\[skip ci\]'; then
+# Only skip if the *subject* of HEAD is our automated bump commit (not any random "[skip ci]" in the body).
+SUBJECT="$(git log -1 --pretty=%s 2>/dev/null || true)"
+if echo "$SUBJECT" | grep -qE '^chore: bump version to [0-9]+\.[0-9]+\.[0-9]+ \[skip ci\]$'; then
   exit 0
 fi
+
+echo "pre-push: bumping PATCH in VERSION" >&2
 
 NEW_VERSION="$("$ROOT/scripts/git/bump-version.sh")"
 git add VERSION
@@ -26,4 +29,5 @@ if git diff --cached --quiet; then
 fi
 
 git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]" --no-verify
+echo "pre-push: committed VERSION ${NEW_VERSION} (included in this push; if remote is behind, run git push again)" >&2
 exit 0
