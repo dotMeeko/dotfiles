@@ -14,4 +14,4 @@ Then use **`git push`** as usual. **`VERSION`** is one line: `MAJOR.MINOR.PATCH`
 
 Change **MAJOR** / **MINOR** in `VERSION` yourself when you need to.
 
-**If PATCH doesn’t bump:** check `git config core.hooksPath` prints `.githooks`. Push from a terminal (some IDEs use **push without hooks**). You need a **new** commit on top of the last auto bump—pushing again with nothing new only uploads the pending bump commit.
+**If PATCH doesn’t bump:** run `./scripts/git/install-git-hooks.sh` again and confirm `ls -l .git/hooks/pre-push` shows a symlink to `.githooks/pre-push`. Some IDEs run **push without hooks**—use the terminal for `git push`. You also need a **new** commit after the last auto bump before another PATCH bump.

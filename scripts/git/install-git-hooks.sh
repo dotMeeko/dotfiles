@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
 
-# Point this repo at .githooks/ so hooks are tracked in git.
-# Run once after clone: ./scripts/git/install-git-hooks.sh
+# Install the version-bump hook into Git's default hook dir (symlink to tracked .githooks).
+# Run once per clone: ./scripts/git/install-git-hooks.sh
+#
+# Uses .git/hooks/pre-push instead of core.hooksPath so all Git clients (CLI, IDE) pick it up reliably.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
-git config core.hooksPath .githooks
-echo "core.hooksPath set to .githooks (this repository only)"
+# If this was set, Git ignores .git/hooks — unset so the symlink below is used.
+git config --local --unset-all core.hooksPath 2>/dev/null || true
+
+mkdir -p .git/hooks
+ln -sf ../../.githooks/pre-push .git/hooks/pre-push
 
 chmod +x .githooks/pre-push scripts/git/bump-version.sh scripts/git/install-git-hooks.sh 2>/dev/null || true
-echo "Hooks: pre-push (PATCH bump before push). Ensure your Git client runs hooks (do not use push with hooks disabled)."
+
+echo "Installed: .git/hooks/pre-push -> .githooks/pre-push"
+echo "If your IDE still skips hooks, push from a terminal or disable \"skip hooks\" for push."
