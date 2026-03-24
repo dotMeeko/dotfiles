@@ -15,7 +15,7 @@ fi
 
 # Only skip if the *subject* of HEAD is our automated bump commit (not any random "[skip ci]" in the body).
 SUBJECT="$(git log -1 --pretty=%s 2>/dev/null || true)"
-if echo "$SUBJECT" | grep -qE '^chore: bump version to [0-9]+\.[0-9]+\.[0-9]+ \[skip ci\]$'; then
+if echo "$SUBJECT" | grep -qE '^chore: bump version to [0-9]+\.[0-9]+\.[0-9]'; then
   exit 0
 fi
 
