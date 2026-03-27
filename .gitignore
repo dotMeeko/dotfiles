@@ -4,3 +4,8 @@
 # Text Editor
 .idea
 .vscode
+
+# Dotter
+.dotter/cache
+.dotter/cache.toml
+.dotter/local.toml
