@@ -1,6 +1,6 @@
 # ~/.dotfiles
 
-**Layout:** `Brewfile` at repo root (Homebrew Bundle), `docs/`, `scripts/git/` (hooks), `scripts/macos/` (bootstrap + defaults), `.dotter/`, `.githooks/`, `VERSION`.
+**Layout:** `Brewfile` at repo root (Homebrew Bundle), `docs/` ([`docs/dotter.md`](docs/dotter.md)), `scripts/git/` (hooks), `scripts/macos/` (bootstrap + defaults), `.dotter/`, `.githooks/`, `VERSION`.
 
 **macOS bootstrap** (Homebrew → `brew bundle`), from the repo root:
 
@@ -14,9 +14,10 @@
 ./scripts/macos/defaults.sh
 ```
 
-**Ghostty** ([`packages/ghostty/config`](packages/ghostty/config)): install via `brew bundle`, then deploy the config:
+**Dotter / Ghostty:** [`docs/dotter.md`](docs/dotter.md). Run **`./scripts/macos/bootstrap.sh`** first — it creates **`.dotter/local.toml`** from `local.toml.example` when missing (Dotter [requires](https://github.com/SuperCuber/dotter/wiki/1.-Getting-Started) it; the file is [gitignored](https://github.com/SuperCuber/dotter/wiki/1.-Getting-Started)). Then deploy Ghostty config:
 
 ```bash
+dotter deploy --dry-run -v
 dotter deploy -v
 ```
 

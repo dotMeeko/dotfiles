@@ -50,4 +50,13 @@ fi
 echo "==> brew bundle install..."
 brew bundle install
 
+# Dotter requires .dotter/local.toml (see wiki). It is gitignored; fresh clones have no file.
+DOTTER_LOCAL="$ROOT/.dotter/local.toml"
+DOTTER_EXAMPLE="$ROOT/.dotter/local.toml.example"
+if [[ ! -f "$DOTTER_LOCAL" && -f "$DOTTER_EXAMPLE" ]]; then
+  mkdir -p "$ROOT/.dotter"
+  cp "$DOTTER_EXAMPLE" "$DOTTER_LOCAL"
+  echo "==> Created .dotter/local.toml from local.toml.example (required for dotter deploy)."
+fi
+
 echo "==> Done. Installed entries are listed in ./Brewfile (use: brew list, brew list --cask)."

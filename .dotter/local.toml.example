@@ -1,0 +1,10 @@
+# Copy is created automatically by ./scripts/macos/bootstrap.sh if missing.
+# Or: cp .dotter/local.toml.example .dotter/local.toml
+
+includes = []
+
+packages = ["default"]
+
+[files]
+
+[variables]
