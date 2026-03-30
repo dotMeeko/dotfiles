@@ -1,0 +1,5 @@
+# Ghostty — https://ghostty.org/docs/config
+# Deployed to ~/.config/ghostty/config via Dotter.
+
+font-size = 13
+window-theme = system

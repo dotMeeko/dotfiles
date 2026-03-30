@@ -14,6 +14,12 @@
 ./scripts/macos/defaults.sh
 ```
 
+**Ghostty** ([`packages/ghostty/config`](packages/ghostty/config)): install via `brew bundle`, then deploy the config:
+
+```bash
+dotter deploy -v
+```
+
 **Auto version:** after you clone this repo, run **once**:
 
 ```bash

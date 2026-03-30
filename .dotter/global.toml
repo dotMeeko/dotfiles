@@ -4,6 +4,7 @@
 depends = []
 
 [default.files]
+"packages/ghostty/config" = "~/.config/ghostty/config"
 
 [default.variables]
 

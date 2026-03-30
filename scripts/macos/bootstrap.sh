@@ -50,5 +50,4 @@ fi
 echo "==> brew bundle install..."
 brew bundle install
 
-echo "Done. dotter: $(command -v dotter)"
-echo "Done. nvim:  $(command -v nvim)"
+echo "==> Done. Installed entries are listed in ./Brewfile (use: brew list, brew list --cask)."

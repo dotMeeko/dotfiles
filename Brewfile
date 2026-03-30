@@ -5,5 +5,8 @@
 # Utilities
 brew "dotter"
 
-# Text Editor
+# Terminal
+cask "ghostty"
+
+# Editor
 brew "neovim"
