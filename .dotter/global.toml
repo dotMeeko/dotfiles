@@ -5,6 +5,8 @@ depends = []
 
 [default.files]
 "packages/ghostty/config" = "~/.config/ghostty/config"
+"packages/nvim/init.lua" = "~/.config/nvim/init.lua"
+"packages/nvim/lua/plugins/init.lua" = "~/.config/nvim/lua/plugins/init.lua"
 
 [default.variables]
 

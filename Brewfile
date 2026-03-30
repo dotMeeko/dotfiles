@@ -4,6 +4,7 @@
 
 # Utilities
 brew "dotter"
+brew "lazygit"
 
 # Terminal
 cask "ghostty"

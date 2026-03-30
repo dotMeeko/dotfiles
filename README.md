@@ -14,7 +14,7 @@
 ./scripts/macos/defaults.sh
 ```
 
-**Dotter / Ghostty:** [`docs/dotter.md`](docs/dotter.md). Run **`./scripts/macos/bootstrap.sh`** first — it creates **`.dotter/local.toml`** from `local.toml.example` when missing (Dotter [requires](https://github.com/SuperCuber/dotter/wiki/1.-Getting-Started) it; the file is [gitignored](https://github.com/SuperCuber/dotter/wiki/1.-Getting-Started)). Then deploy Ghostty config:
+**Dotter** (Ghostty, Neovim): [`docs/dotter.md`](docs/dotter.md). Run **`./scripts/macos/bootstrap.sh`** first — it creates **`.dotter/local.toml`** from `local.toml.example` when missing (Dotter [requires](https://github.com/SuperCuber/dotter/wiki/1.-Getting-Started) it; the file is [gitignored](https://github.com/SuperCuber/dotter/wiki/1.-Getting-Started)). **Neovim** uses [Lazy.nvim](https://github.com/folke/lazy.nvim) + [lazygit.nvim](https://github.com/kdheepak/lazygit.nvim) (`<leader>` = space → **`Space g g`** LazyGit — needs **`lazygit`** from Homebrew). Deploy configs:
 
 ```bash
 dotter deploy --dry-run -v
