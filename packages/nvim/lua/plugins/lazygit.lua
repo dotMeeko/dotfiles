@@ -1,12 +1,5 @@
+-- LazyGit (https://github.com/kdheepak/lazygit.nvim) — needs `lazygit` on PATH (brew).
 return {
-  {
-    "folke/tokyonight.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      vim.cmd.colorscheme("tokyonight")
-    end,
-  },
   {
     "kdheepak/lazygit.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },

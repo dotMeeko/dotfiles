@@ -4,7 +4,11 @@
 
 # Utilities
 brew "dotter"
+brew "fd"
+brew "fzf"
 brew "lazygit"
+brew "ripgrep"
+brew "tree-sitter"
 
 # Terminal
 cask "ghostty"
