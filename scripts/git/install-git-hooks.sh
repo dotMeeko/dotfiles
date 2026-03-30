@@ -16,7 +16,7 @@ git config --local --unset-all core.hooksPath 2>/dev/null || true
 mkdir -p .git/hooks
 ln -sf ../../.githooks/pre-push .git/hooks/pre-push
 
-chmod +x .githooks/pre-push scripts/git/bump-version.sh scripts/git/install-git-hooks.sh 2>/dev/null || true
+chmod +x .githooks/pre-push scripts/git/bump-version.sh scripts/git/install-git-hooks.sh scripts/macos/bootstrap.sh scripts/macos/defaults.sh 2>/dev/null || true
 
 echo "Installed: .git/hooks/pre-push -> .githooks/pre-push"
 echo "If your IDE still skips hooks, push from a terminal or disable \"skip hooks\" for push."
