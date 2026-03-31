@@ -6,6 +6,8 @@ depends = []
 [default.files]
 "packages/ghostty/config" = "~/.config/ghostty/config"
 "packages/nvim" = "~/.config/nvim"
+"packages/starship/starship.toml" = "~/.config/starship.toml"
+"packages/zsh/.zshrc" = "~/.zshrc"
 
 [default.variables]
 

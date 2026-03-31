@@ -8,6 +8,7 @@ brew "fd"
 brew "fzf"
 brew "lazygit"
 brew "ripgrep"
+brew "starship"
 brew "tree-sitter"
 
 # Fonts
