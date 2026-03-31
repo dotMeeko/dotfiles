@@ -2,7 +2,7 @@
 # Deployed to ~/.config/ghostty/config via Dotter.
 
 # Font
-font-size = 13
+font-size = 14
 font-family = "Iosevka Nerd Font Mono"
 
 window-theme = system

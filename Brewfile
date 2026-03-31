@@ -10,6 +10,7 @@ brew "lazygit"
 brew "ripgrep"
 brew "starship"
 brew "tree-sitter"
+brew "zellij"
 
 # Fonts
 cask "font-iosevka-nerd-font"
