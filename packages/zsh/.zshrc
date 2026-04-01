@@ -14,3 +14,11 @@ if [[ -o interactive ]] \
   eval "$(zellij setup --generate-auto-start zsh)"
 fi
 
+# Eza aliases
+if command -v eza >/dev/null 2>&1; then
+  alias l='eza'
+  alias ll='eza -lah'
+  alias la='eza -a'
+  alias lt='eza -T'
+fi
+

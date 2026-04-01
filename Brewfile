@@ -4,6 +4,7 @@
 
 # Utilities
 brew "dotter"
+brew "eza"
 brew "fd"
 brew "fzf"
 brew "lazygit"
