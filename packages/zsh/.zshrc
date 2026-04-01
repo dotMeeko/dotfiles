@@ -22,3 +22,9 @@ if command -v eza >/dev/null 2>&1; then
   alias lt='eza -T'
 fi
 
+# bat aliases (do not override cat by default)
+if command -v bat >/dev/null 2>&1; then
+  alias b='bat'
+  alias bl='bat --style=full --paging=always'
+fi
+

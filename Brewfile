@@ -3,6 +3,7 @@
 # https://docs.brew.sh/Manpage#bundle-subcommand
 
 # Utilities
+brew "bat"
 brew "dotter"
 brew "eza"
 brew "fd"
