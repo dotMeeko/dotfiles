@@ -1,0 +1,10 @@
+# Operating System
+.DS_Store
+
+# Editors
+.idea
+.vscode
+
+# AI Tools
+.claude/
+CLAUDE.md

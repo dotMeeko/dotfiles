@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Pre-commit: bump PATCH in VERSION and stage it into this commit. Skip with SKIP_VERSION_BUMP=1.
+set -euo pipefail
+
+[ "${SKIP_VERSION_BUMP:-}" = "1" ] && exit 0
+
+ROOT="$(git rev-parse --show-toplevel)"
+NEW_VERSION="$("$ROOT/scripts/git/bump-version.sh")"
+git add "$ROOT/VERSION"
+echo "pre-commit: VERSION -> ${NEW_VERSION}" >&2
