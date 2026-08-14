@@ -123,5 +123,5 @@ in
   # DO NOT change after install. This is not the NixOS version but a marker for
   # stateful data compatibility (databases, config formats). Keep the value the
   # system was originally installed with.
-  system.stateVersion = "26.11";
+  system.stateVersion = "26.05";
 }

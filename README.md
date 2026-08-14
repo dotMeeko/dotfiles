@@ -9,6 +9,10 @@
 Nix runs on `bifrost` only. The other two use chezmoi for dotfiles and their
 native package manager for software.
 
+`bifrost` tracks **NixOS 26.05** (stable), not `nixos-unstable`. nixpkgs and
+home-manager are pinned to the same release branch — mixing them breaks in
+non-obvious ways. Bump both together when moving to the next release.
+
 ## Install
 
 **NixOS** — from the live ISO, booted in UEFI mode. Lists the disks, you pick

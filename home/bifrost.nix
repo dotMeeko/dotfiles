@@ -17,7 +17,7 @@ in
   home.homeDirectory = "/home/${user.username}";
 
   # Same rule as system.stateVersion: set once, do not bump it later.
-  home.stateVersion = "26.11";
+  home.stateVersion = "26.05";
 
   # --- Shell aliases specific to this machine --------------------------------
   programs.zsh.shellAliases = {

@@ -6,10 +6,15 @@
   # windows/.
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # Stable release, not nixos-unstable: package versions are frozen and only
+    # security and bug fixes land, so a `nix flake update` cannot pull in a
+    # surprise. Bump this to the next release branch deliberately.
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
 
+    # Must track the same release as nixpkgs. home-manager's master expects
+    # unstable and will reference options a stable nixpkgs does not have.
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -23,12 +28,18 @@
     # which is what lets niri be configured in Nix — and it is also the API the
     # DMS niri module builds its keybindings on. The nixpkgs module only has
     # enable/package. This flake disables the nixpkgs one to avoid a conflict.
+    #
+    # NOTE: this flake is developed against nixos-unstable, and `follows` points
+    # it at our stable nixpkgs instead. That is the usual arrangement, but if a
+    # build ever fails on a missing attribute, dropping the follows line lets it
+    # use its own unstable nixpkgs — at the cost of a second copy in the store.
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # The stable branch tracks tagged releases instead of bleeding-edge master.
+    # Same caveat as niri above: upstream targets unstable.
     dms = {
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
