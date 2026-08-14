@@ -1,0 +1,35 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/usr/bin/env bash
+#
+# Installs valhalla's packages with Homebrew. Re-runs whenever the list in
+# .chezmoidata/packages.yaml changes, because those values are rendered into
+# this script — so its content changes with the data.
+
+set -euo pipefail
+
+if ! command -v brew >/dev/null 2>&1; then
+    echo "==> Homebrew is not installed; installing it first"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Put brew on PATH for the rest of this script. Apple Silicon uses
+    # /opt/homebrew; Intel Macs use /usr/local.
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+fi
+
+echo "==> Installing packages with brew bundle"
+
+brew bundle --no-lock --file=/dev/stdin <<EOF
+{{ range .packages.valhalla.brews -}}
+brew {{ . | quote }}
+{{ end -}}
+{{ range .packages.valhalla.casks -}}
+cask {{ . | quote }}
+{{ end -}}
+EOF
+
+echo "==> Packages installed"
+{{ end -}}

@@ -1,0 +1,24 @@
+# Ghostty — managed by chezmoi, edit the source not this file.
+#
+# Ghostty reads $XDG_CONFIG_HOME/ghostty/config on every platform, macOS
+# included, so this one file works there and on plain Linux alike.
+#
+# On NixOS the same settings are applied through home-manager instead
+# (home/wladimir.nix), because there ghostty is a Nix package.
+#
+# Reference: https://ghostty.org/docs/config/reference
+
+font-family = JetBrainsMono Nerd Font
+font-size = 13
+
+# Themes ship with ghostty. Run `ghostty +list-themes` to see what this build
+# has, then set e.g. theme = catppuccin-mocha
+background-opacity = 0.95
+
+window-padding-x = 8
+window-padding-y = 8
+
+cursor-style = bar
+mouse-hide-while-typing = true
+
+confirm-close-surface = false

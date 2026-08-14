@@ -1,0 +1,35 @@
+{{ if eq .chezmoi.os "windows" -}}
+# Installs Windows packages. Re-runs whenever .chezmoidata/packages.yaml
+# changes, since the IDs below are rendered into this script.
+#
+# This complements windows/configuration.winget: that file is the full
+# first-boot setup (it also enables Developer Mode), while this keeps the
+# package list in sync afterwards without a full reconfigure.
+#
+# chezmoi runs .ps1 scripts with pwsh (PowerShell 7), falling back to
+# Windows PowerShell when pwsh is absent.
+
+$ErrorActionPreference = "Stop"
+
+$packages = @(
+{{ range .packages.midgard.winget -}}
+    "{{ . }}"
+{{ end -}}
+)
+
+Write-Host "==> Checking Windows packages" -ForegroundColor Green
+
+foreach ($pkg in $packages) {
+    # `winget list --id` exits non-zero when the package is absent.
+    winget list --id $pkg --exact --accept-source-agreements *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  installing $pkg" -ForegroundColor DarkGray
+        winget install --id $pkg --exact `
+            --accept-package-agreements `
+            --accept-source-agreements `
+            --disable-interactivity
+    }
+}
+
+Write-Host "==> Packages up to date" -ForegroundColor Green
+{{ end -}}

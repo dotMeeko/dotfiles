@@ -1,0 +1,51 @@
+# Package lists for the machines Nix does not manage: valhalla and midgard.
+#
+# chezmoi inlines these values into the rendered run_onchange_ scripts, so
+# changing a package here changes the script's content, which is what makes
+# them re-run. No separate hash comment is needed.
+#
+# bifrost is NOT here — it gets the same tools from home/common.nix. Keep the
+# two in intent-sync by hand: the tools should feel the same everywhere.
+
+packages:
+  valhalla:
+    # CLI, mirroring home.packages on bifrost.
+    brews:
+      - git
+      - neovim
+      - starship
+      - zoxide
+      - fzf
+      - ripgrep
+      - fd
+      - bat
+      - eza
+      - jq
+      - tree
+      - lazygit
+      - chezmoi
+      - mise
+
+    # GUI apps.
+    casks:
+      - ghostty
+      - font-jetbrains-mono-nerd-font
+
+  midgard:
+    # WinGet package IDs. The full first-boot setup lives in
+    # windows/configuration.winget; this list keeps them in sync afterwards.
+    winget:
+      - Git.Git
+      - Microsoft.PowerShell
+      - Starship.Starship
+      - Neovim.Neovim
+      - junegunn.fzf
+      - BurntSushi.ripgrep.MSVC
+      - sharkdp.fd
+      - sharkdp.bat
+      - eza-community.eza
+      - ajeetdsouza.zoxide
+      - JesseDuffield.lazygit
+      - twpayne.chezmoi
+      - Microsoft.WindowsTerminal
+      - DEVCOM.JetBrainsMonoNerdFont

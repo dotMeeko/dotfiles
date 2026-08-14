@@ -1,0 +1,40 @@
+{{/*
+  Which files land on which machine.
+
+  chezmoi drives valhalla (macOS) and midgard (Windows). bifrost runs NixOS,
+  where home-manager owns these paths — chezmoi must not write there, or the
+  two fight over the same files.
+
+  Matched against the TARGET path (~/.config/…), not the source path
+  (dot_config/…). This file is always treated as a template, .tmpl suffix or
+  not. A "!" line un-ignores and takes priority over every include.
+*/}}
+
+{{- if ne .chezmoi.os "windows" }}
+{{/* The PowerShell profile is Windows-only. */}}
+.config/powershell/**
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+{{/* Ghostty does not run on Windows. */}}
+.config/ghostty/**
+{{- end }}
+
+{{- if eq .chezmoi.os "linux" }}
+{{/*
+  On NixOS home-manager writes these out of the Nix store. Plain (non-NixOS)
+  Linux still gets them from here.
+
+  .chezmoi.osRelease only exists on Linux, hence the nested guard.
+*/}}
+{{-   if .chezmoi.osRelease }}
+{{-     if eq .chezmoi.osRelease.id "nixos" }}
+.config/starship.toml
+.config/ghostty/**
+{{-     end }}
+{{-   end }}
+{{- end }}
+
+{{/* Never deploy repository furniture into the home directory. */}}
+README.md
+LICENSE

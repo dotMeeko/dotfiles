@@ -1,0 +1,34 @@
+{{ if eq .chezmoi.os "windows" -}}
+# Points the real $PROFILE at the chezmoi-managed profile.
+#
+# WHY THIS EXISTS: $PROFILE normally resolves under ~\Documents, but Windows
+# redirects Documents into OneDrive on many machines, so the path is not
+# predictable from the repo. Writing to a hardcoded ~\Documents\... would
+# silently land in a folder PowerShell never reads.
+#
+# Instead chezmoi writes the real profile to ~/.config/powershell/profile.ps1
+# and this script drops a one-line stub at whatever $PROFILE actually is.
+#
+# profile.ps1 hash: {{ include "dot_config/powershell/profile.ps1" | sha256sum }}
+
+$ErrorActionPreference = "Stop"
+
+$managed = Join-Path $HOME ".config\powershell\profile.ps1"
+$stub = ". `"$managed`""
+
+foreach ($target in @($PROFILE.CurrentUserCurrentHost, $PROFILE.CurrentUserAllHosts)) {
+    if (-not $target) { continue }
+
+    $dir = Split-Path -Parent $target
+    if (-not (Test-Path $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+
+    $current = if (Test-Path $target) { Get-Content $target -Raw } else { "" }
+
+    if ($current -notmatch [regex]::Escape($managed)) {
+        Write-Host "==> Linking $target -> $managed" -ForegroundColor Green
+        Set-Content -Path $target -Value $stub -Encoding UTF8
+    }
+}
+{{ end -}}

@@ -1,0 +1,206 @@
+# WinGet Configuration (DSC v3) for a fresh Windows 11 machine.
+#
+# Apply with:
+#   winget configure -f windows/configuration.winget --accept-configuration-agreements
+#
+# Requires WinGet 1.11+ for the dscv3 processor (winget --version to check).
+# The older 0.2 schema with `properties:`/`configurationVersion:` is legacy;
+# this is the current format.
+#
+# NOTE ON PERFORMANCE: native Microsoft.Windows/* resources evaluate in seconds,
+# while PowerShell "adapted" resources can take minutes. Prefer native ones.
+
+$schema: https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
+
+metadata:
+  winget:
+    processor:
+      identifier: dscv3
+
+resources:
+  # --- Hostname ---------------------------------------------------------------
+  # This machine is `midgard`, matching bifrost (NixOS) and valhalla (macOS).
+  #
+  # There is no first-party DSC resource for the computer name, so this goes
+  # through RunCommandOnSet. Rename-Computer only takes effect after a reboot,
+  # and it is a no-op when the name already matches.
+  - type: Microsoft.DSC.Transitional/RunCommandOnSet
+    name: Hostname
+    properties:
+      executable: powershell.exe
+      arguments:
+        "0": -NoProfile
+        "1": -NoLogo
+        "2": -Command
+        "3": >-
+          if ($env:COMPUTERNAME -ne 'midgard')
+          { Rename-Computer -NewName 'midgard' -Force;
+          Write-Host 'renamed to midgard — takes effect after a reboot' }
+        treatAsArray: true
+    metadata:
+      winget:
+        securityContext: elevated
+      description: Name this machine midgard
+
+  # --- Shell and prompt -------------------------------------------------------
+  # PowerShell 7 comes first: chezmoi runs .ps1 scripts with pwsh, and the
+  # module install below needs it too.
+  - type: Microsoft.WinGet/Package
+    name: PowerShell
+    metadata:
+      description: PowerShell 7 — chezmoi runs .ps1 scripts with pwsh
+    properties:
+      id: Microsoft.PowerShell
+      source: winget
+      useLatest: true
+
+  # --- Developer Mode ---------------------------------------------------------
+  # Needed before chezmoi ever runs: it cannot create symlinks on Windows
+  # without it.
+  #
+  # Microsoft.Windows.Settings is an ADAPTED (PowerShell class-based) resource.
+  # Under dscv3 the processor no longer installs such modules automatically —
+  # that changed from v2 — so the module has to be installed explicitly first
+  # or the resource fails to resolve.
+  - type: Microsoft.DSC.Transitional/RunCommandOnSet
+    name: WindowsSettingsModule
+    dependsOn:
+      - PowerShell
+    properties:
+      executable: C:\Program Files\PowerShell\7\pwsh.exe
+      arguments:
+        "0": -NoProfile
+        "1": -NoLogo
+        "2": -Command
+        "3": >-
+          if (-not (Get-Module -ListAvailable -Name Microsoft.Windows.Settings))
+          { Install-PSResource -Name Microsoft.Windows.Settings -Prerelease
+          -TrustRepository -AcceptLicense }
+        treatAsArray: true
+    metadata:
+      description: Ensure the Microsoft.Windows.Settings module is present
+
+  - type: Microsoft.Windows.Settings/WindowsSettings
+    name: DeveloperMode
+    dependsOn:
+      - WindowsSettingsModule
+    metadata:
+      description: Enable Developer Mode so chezmoi can create symlinks
+      winget:
+        securityContext: elevated
+    properties:
+      DeveloperMode: true
+
+  - type: Microsoft.WinGet/Package
+    name: Starship
+    dependsOn:
+      - PowerShell
+    metadata:
+      description: Cross-platform prompt, shares dot_config/starship.toml
+    properties:
+      id: Starship.Starship
+      source: winget
+      useLatest: true
+
+  # --- Dotfiles ---------------------------------------------------------------
+  - type: Microsoft.WinGet/Package
+    name: Git
+    metadata:
+      description: Git
+    properties:
+      id: Git.Git
+      source: winget
+      useLatest: true
+
+  - type: Microsoft.WinGet/Package
+    name: Chezmoi
+    dependsOn:
+      - Git
+    metadata:
+      description: Dotfile manager — applies the shared configs
+    properties:
+      id: twpayne.chezmoi
+      source: winget
+      useLatest: true
+
+  # --- Terminal and editor ----------------------------------------------------
+  - type: Microsoft.WinGet/Package
+    name: WindowsTerminal
+    metadata:
+      description: Windows Terminal
+    properties:
+      id: Microsoft.WindowsTerminal
+      source: winget
+      useLatest: true
+
+  - type: Microsoft.WinGet/Package
+    name: Neovim
+    metadata:
+      description: Neovim
+    properties:
+      id: Neovim.Neovim
+      source: winget
+      useLatest: true
+
+  # --- CLI tools --------------------------------------------------------------
+  # Same set as the Nix and Homebrew sides, so muscle memory carries across.
+  - type: Microsoft.WinGet/Package
+    name: Fzf
+    properties:
+      id: junegunn.fzf
+      source: winget
+      useLatest: true
+
+  - type: Microsoft.WinGet/Package
+    name: Ripgrep
+    properties:
+      id: BurntSushi.ripgrep.MSVC
+      source: winget
+      useLatest: true
+
+  - type: Microsoft.WinGet/Package
+    name: Fd
+    properties:
+      id: sharkdp.fd
+      source: winget
+      useLatest: true
+
+  - type: Microsoft.WinGet/Package
+    name: Bat
+    properties:
+      id: sharkdp.bat
+      source: winget
+      useLatest: true
+
+  - type: Microsoft.WinGet/Package
+    name: Eza
+    properties:
+      id: eza-community.eza
+      source: winget
+      useLatest: true
+
+  - type: Microsoft.WinGet/Package
+    name: Zoxide
+    properties:
+      id: ajeetdsouza.zoxide
+      source: winget
+      useLatest: true
+
+  - type: Microsoft.WinGet/Package
+    name: Lazygit
+    properties:
+      id: JesseDuffield.lazygit
+      source: winget
+      useLatest: true
+
+  # --- Font -------------------------------------------------------------------
+  # starship.toml and the terminal config both assume a Nerd Font; without it
+  # the prompt renders as boxes.
+  - type: Microsoft.WinGet/Package
+    name: JetBrainsMonoNerdFont
+    metadata:
+      description: JetBrainsMono Nerd Font — required by the starship prompt
+    properties:
+      id: DEVCOM.JetBrainsMonoNerdFont
+      source: winget
+      useLatest: true
