@@ -16,9 +16,11 @@ in
   #   @nix       -> /nix         the store
   #   @log       -> /var/log     logs survive a rollback, which is the point:
   #                              you need the logs of whatever broke
-  #   @snapshots -> /.snapshots  outside @ and @home on purpose, so restoring a
-  #                              subvolume cannot delete the snapshots you are
-  #                              restoring from
+  #   @home-snapshots -> /home/.snapshots
+  #                              snapper requires a subvolume literally named
+  #                              .snapshots inside the one it manages. It is a
+  #                              separate subvolume, so rolling @home back does
+  #                              not take the snapshots with it
   #
   # HOW A ROLLBACK WORKS HERE:
   # The system itself rolls back through the NixOS generation menu in GRUB —

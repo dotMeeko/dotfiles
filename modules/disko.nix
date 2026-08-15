@@ -64,8 +64,15 @@
                 mountpoint = "/var/log";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
-              "@snapshots" = {
-                mountpoint = "/.snapshots";
+              # snapper requires a subvolume literally named .snapshots INSIDE
+              # the subvolume it manages — for a config on /home that means
+              # /home/.snapshots, not /.snapshots.
+              #
+              # It is its own subvolume so that rolling @home back does not
+              # take the snapshots with it: a snapshot stored inside the thing
+              # it protects disappears exactly when it is needed.
+              "@home-snapshots" = {
+                mountpoint = "/home/.snapshots";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
             };
