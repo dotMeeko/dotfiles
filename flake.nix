@@ -48,9 +48,15 @@
     # Zen browser is not in nixpkgs; this community flake packages it (mirroring
     # how Firefox is built in nixpkgs) and ships a home-manager module. It is
     # free software, so no allowUnfree is needed for it.
+    #
+    # NOTE: no nixpkgs.follows here on purpose. This flake is developed against
+    # nixos-unstable and its package.nix pulls in packages (e.g. ffmpeg_9) that
+    # our stable nixpkgs does not have yet — forcing the follows makes eval fail
+    # with `callPackageWith: … without required argument "ffmpeg_9"`. Letting it
+    # use its own unstable nixpkgs fixes the build, at the cost of a second copy
+    # of nixpkgs in the store. Same trade-off as niri/dms above.
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
   };

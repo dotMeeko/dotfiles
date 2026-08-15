@@ -2,6 +2,14 @@
 
 let
   disk = import ../disk.nix;
+
+  # Shared btrfs mount options, defined once so every subvolume stays in sync.
+  #   compress=zstd  transparent compression; cheap on this CPU, saves writes
+  #   noatime        do not write an access time on every read
+  #   discard=async  batched, asynchronous TRIM — keeps the SSD's garbage
+  #                  collection healthy without the latency of sync discard.
+  #                  This is the modern replacement for a periodic fstrim timer.
+  btrfsMountOptions = [ "compress=zstd" "noatime" "discard=async" ];
 in
 {
   # --- Declarative partitioning ----------------------------------------------
@@ -52,19 +60,19 @@ in
             subvolumes = {
               "@" = {
                 mountpoint = "/";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = btrfsMountOptions;
               };
               "@home" = {
                 mountpoint = "/home";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = btrfsMountOptions;
               };
               "@nix" = {
                 mountpoint = "/nix";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = btrfsMountOptions;
               };
               "@log" = {
                 mountpoint = "/var/log";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = btrfsMountOptions;
               };
               # snapper requires a subvolume literally named .snapshots INSIDE
               # the subvolume it manages — for a config on /home that means
@@ -75,7 +83,7 @@ in
               # it protects disappears exactly when it is needed.
               "@home-snapshots" = {
                 mountpoint = "/home/.snapshots";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = btrfsMountOptions;
               };
             };
           };
