@@ -69,46 +69,52 @@
     # Screenshots land here rather than in the home root.
     screenshot-path = "${config.home.homeDirectory}/Pictures/screenshots/%Y-%m-%d-%H%M%S.png";
 
-    # Nothing here duplicates the DMS bindings above — these are the
-    # compositor's own window management keys.
-    binds = with config.lib.niri.actions; {
-      "Mod+T".action = spawn "ghostty";
-      "Mod+Q".action = close-window;
-      "Mod+Shift+E".action = quit;
+    # Nothing here duplicates the DMS bindings — these are the compositor's own
+    # window management keys.
+    #
+    # An action is an attrset with one key (its name) whose value is the
+    # argument list; a single argument may be passed bare, and an action with
+    # no arguments takes an empty list. Writing them as bare names — as if
+    # `config.lib.niri.actions` exported every action as a value — fails with
+    # "undefined variable", because only some are exposed that way.
+    binds = {
+      "Mod+T".action.spawn = "ghostty";
+      "Mod+Q".action.close-window = [ ];
+      "Mod+Shift+E".action.quit.skip-confirmation = true;
 
-      "Mod+Left".action = focus-column-left;
-      "Mod+Right".action = focus-column-right;
-      "Mod+Up".action = focus-window-up;
-      "Mod+Down".action = focus-window-down;
+      "Mod+Left".action.focus-column-left = [ ];
+      "Mod+Right".action.focus-column-right = [ ];
+      "Mod+Up".action.focus-window-up = [ ];
+      "Mod+Down".action.focus-window-down = [ ];
 
-      "Mod+H".action = focus-column-left;
-      "Mod+L".action = focus-column-right;
-      "Mod+K".action = focus-window-up;
-      "Mod+J".action = focus-window-down;
+      "Mod+H".action.focus-column-left = [ ];
+      "Mod+L".action.focus-column-right = [ ];
+      "Mod+K".action.focus-window-up = [ ];
+      "Mod+J".action.focus-window-down = [ ];
 
-      "Mod+Shift+H".action = move-column-left;
-      "Mod+Shift+L".action = move-column-right;
-      "Mod+Shift+K".action = move-window-up;
-      "Mod+Shift+J".action = move-window-down;
+      "Mod+Shift+H".action.move-column-left = [ ];
+      "Mod+Shift+L".action.move-column-right = [ ];
+      "Mod+Shift+K".action.move-window-up = [ ];
+      "Mod+Shift+J".action.move-window-down = [ ];
 
-      "Mod+1".action = focus-workspace 1;
-      "Mod+2".action = focus-workspace 2;
-      "Mod+3".action = focus-workspace 3;
-      "Mod+4".action = focus-workspace 4;
+      "Mod+1".action.focus-workspace = 1;
+      "Mod+2".action.focus-workspace = 2;
+      "Mod+3".action.focus-workspace = 3;
+      "Mod+4".action.focus-workspace = 4;
 
-      "Mod+Shift+1".action = move-column-to-workspace 1;
-      "Mod+Shift+2".action = move-column-to-workspace 2;
-      "Mod+Shift+3".action = move-column-to-workspace 3;
-      "Mod+Shift+4".action = move-column-to-workspace 4;
+      "Mod+Shift+1".action.move-column-to-workspace = 1;
+      "Mod+Shift+2".action.move-column-to-workspace = 2;
+      "Mod+Shift+3".action.move-column-to-workspace = 3;
+      "Mod+Shift+4".action.move-column-to-workspace = 4;
 
-      "Mod+F".action = maximize-column;
-      "Mod+Shift+F".action = fullscreen-window;
-      "Mod+W".action = toggle-column-tabbed-display;
-      "Mod+R".action = switch-preset-column-width;
-      "Mod+Shift+Space".action = toggle-window-floating;
+      "Mod+F".action.maximize-column = [ ];
+      "Mod+Shift+F".action.fullscreen-window = [ ];
+      "Mod+W".action.toggle-column-tabbed-display = [ ];
+      "Mod+R".action.switch-preset-column-width = [ ];
+      "Mod+Shift+Space".action.toggle-window-floating = [ ];
 
-      "Print".action = screenshot;
-      "Shift+Print".action = screenshot-window;
+      "Print".action.screenshot = [ ];
+      "Shift+Print".action.screenshot-window = [ ];
     };
   };
 }
