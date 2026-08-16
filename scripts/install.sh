@@ -283,26 +283,83 @@ if command -v git >/dev/null 2>&1 && git -C "$REPO_DIR" rev-parse --git-dir >/de
 fi
 
 # --- Install -----------------------------------------------------------------
-# disko-install partitions, formats, mounts and installs in one step. The
-# --disk flag overwrites the placeholder device in modules/disko.nix.
+# Built directly onto the target disk, with the build backed by swap on that
+# same disk — so it is never bounded by RAM alone.
+#
+# disko-install would do partition + build + install in one step, but it builds
+# the whole closure in the live ISO's store *before* it touches the disk, and
+# that store is a tmpfs living in RAM. On a small machine the build (the
+# dms-shell Go compiler alone wants a couple of GB) fills RAM and the kernel
+# OOM-kills it long before the disk is ever written. So the job is split:
+#
+#   1. disko partitions, formats and mounts the target at /mnt
+#   2. a swap file is created on that disk and the RAM store is allowed to spill
+#      into it, so even a 4 GB box has room to build
+#   3. nixos-install builds and installs into /mnt
+#
+# The same route works on any amount of RAM, so it is the only one.
 
-# Stage the password hash for --extra-files. disko-install copies these onto
-# the target *before* running nixos-install, so the hash is in place by the
-# time activation reads hashedPasswordFile.
-SECRETS=$(mktemp -d)
-trap 'rm -rf "$SECRETS"' EXIT
-umask 077
-printf '%s\n' "$PASS_HASH" > "$SECRETS/$USERNAME"
-chmod 600 "$SECRETS/$USERNAME"
+MNT=/mnt
 
-info "Partitioning and installing — this takes a while"
+info "Partitioning and mounting $BY_ID — this erases it"
 echo
 
+# --mode destroy,format,mount does the full run and mounts the result at /mnt.
+# --disk overwrites the placeholder device in modules/disko.nix, exactly as the
+# old disko-install call did.
 nix --experimental-features "nix-command flakes" \
-  run 'github:nix-community/disko/latest#disko-install' -- \
+  run 'github:nix-community/disko/latest#disko' -- \
+  --mode destroy,format,mount \
   --flake "$REPO_DIR#$FLAKE_ATTR" \
-  --disk main "$BY_ID" \
-  --extra-files "$SECRETS/$USERNAME" "/etc/nixos-secrets/$USERNAME"
+  --disk main "$BY_ID"
+
+# Swap on the freshly mounted disk. Size it so RAM + swap reaches ~36 GB (more
+# than this closure needs to build), and never add less than 8 GB.
+ram_gb=$(( $(awk '/MemTotal/{print $2}' /proc/meminfo) / 1024 / 1024 ))
+swap_gb=$(( 36 - ram_gb )); (( swap_gb < 8 )) && swap_gb=8
+SWAPDIR="$MNT/.swap"
+SWAPFILE="$SWAPDIR/swapfile"
+
+info "Adding ${swap_gb}G of swap on the disk"
+# btrfs will not swap on a copy-on-write or compressed file. Our subvolumes
+# mount with compress=zstd, and once compression is active `chattr +C` on a
+# file is rejected outright — so the naive truncate/chattr/dd recipe fails here.
+# btrfs-progs 6.1+ creates a correct (nodatacow) swapfile in one command; fall
+# back to inheriting nocow from a chattr'd directory for older tools, where
+# setting +C on the still-empty *directory* does work.
+mkdir -p "$SWAPDIR"
+chattr +C "$SWAPDIR" 2>/dev/null || true
+if ! btrfs filesystem mkswapfile --size "${swap_gb}G" "$SWAPFILE" 2>/dev/null; then
+  truncate -s 0 "$SWAPFILE"
+  dd if=/dev/zero of="$SWAPFILE" bs=1M count=$(( swap_gb * 1024 )) status=none
+  mkswap "$SWAPFILE" >/dev/null
+fi
+chmod 600 "$SWAPFILE"
+swapon "$SWAPFILE"
+
+# Let the RAM store spill into that swap. The live store is a tmpfs capped at
+# half of RAM; raise the cap toward RAM + swap so a large build fits (tmpfs
+# pages are swappable, so the disk absorbs whatever does not fit in memory).
+store_gb=$(( ram_gb + swap_gb - 6 )); (( store_gb < 8 )) && store_gb=8
+mount -o "remount,size=${store_gb}G" /nix/.rw-store
+
+# Put the password hash where hashedPasswordFile will read it on the target,
+# before nixos-install activates the system. disko-install used --extra-files
+# for this; with a plain nixos-install we write it into /mnt ourselves.
+umask 077
+mkdir -p "$MNT/etc/nixos-secrets"
+printf '%s\n' "$PASS_HASH" > "$MNT/etc/nixos-secrets/$USERNAME"
+chmod 600 "$MNT/etc/nixos-secrets/$USERNAME"
+
+info "Building and installing — this takes a while"
+echo
+
+nixos-install --flake "$REPO_DIR#$FLAKE_ATTR" --root "$MNT" --no-root-passwd
+
+# The swap file was only for the build; do not leave it on the installed system.
+info "Removing install swap"
+swapoff "$SWAPFILE" 2>/dev/null || true
+rm -rf "$SWAPDIR"
 
 # --- Done --------------------------------------------------------------------
 

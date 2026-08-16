@@ -101,6 +101,14 @@ in
 
   # --- Nix -------------------------------------------------------------------
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Garbage-collect *during* a build when free space runs low, instead of
+  # letting a rebuild die with "no space left on device" partway through.
+  # Dropping below min-free triggers a GC that frees up to max-free. The weekly
+  # gc below is the routine cleanup; this is the in-build safety net.
+  nix.settings.min-free = 1024 * 1024 * 1024; # 1 GiB
+  nix.settings.max-free = 5 * 1024 * 1024 * 1024; # 5 GiB
+
   nix.gc = {
     automatic = true;
     dates = "weekly";
