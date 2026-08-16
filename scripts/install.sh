@@ -301,17 +301,34 @@ fi
 
 MNT=/mnt
 
+# Record the chosen disk where disko.nix reads it, and commit it: the `disko`
+# command (unlike disko-install) has no --disk flag, and nix builds a flake
+# from the git tree, so an uncommitted disk.nix would still partition the
+# placeholder. Same write-then-commit pattern as user.nix above.
+cat > "$REPO_DIR/disk.nix" <<EOF
+# Which disk bifrost installs onto — written by scripts/install.sh from the
+# disk you picked. by-id, so it is tied to the hardware, not probe order.
+{
+  main = "$BY_ID";
+}
+EOF
+if command -v git >/dev/null 2>&1 && git -C "$REPO_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+  git -C "$REPO_DIR" add disk.nix
+  git -C "$REPO_DIR" -c user.email=install@localhost -c user.name=installer \
+    commit -q -m "disk: $BY_ID" -- disk.nix 2>/dev/null || true
+fi
+info "Wrote disk.nix for $BY_ID"
+
 info "Partitioning and mounting $BY_ID — this erases it"
 echo
 
-# --mode destroy,format,mount does the full run and mounts the result at /mnt.
-# --disk overwrites the placeholder device in modules/disko.nix, exactly as the
-# old disko-install call did.
+# --mode destroy,format,mount runs destroy + format + mount in sequence (what
+# used to be --mode disko) and mounts the result at /mnt. The device comes from
+# disk.nix, committed just above.
 nix --experimental-features "nix-command flakes" \
   run 'github:nix-community/disko/latest#disko' -- \
   --mode destroy,format,mount \
-  --flake "$REPO_DIR#$FLAKE_ATTR" \
-  --disk main "$BY_ID"
+  --flake "$REPO_DIR#$FLAKE_ATTR"
 
 # Swap on the freshly mounted disk. Size it so RAM + swap reaches ~36 GB (more
 # than this closure needs to build), and never add less than 8 GB.

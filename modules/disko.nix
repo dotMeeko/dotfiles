@@ -1,5 +1,8 @@
 { ... }:
 
+let
+  disk = import ../disk.nix;
+in
 {
   # --- Declarative partitioning ----------------------------------------------
   #
@@ -8,21 +11,20 @@
   # entries from this same declaration — so the mounts can never drift out of
   # sync with the layout.
   #
-  # THE DEVICE BELOW IS A PLACEHOLDER. This machine has two drives, so the real
-  # target is chosen at install time:
+  # THE TARGET IS NOT HARDCODED. It lives in disk.nix, which scripts/install.sh
+  # rewrites from the disk you pick and commits before partitioning — the same
+  # pattern as user.nix. A wrong value here would erase the wrong drive, so it
+  # is never a real disk in the repo.
   #
-  #   disko-install --flake .#bifrost --disk main /dev/disk/by-id/<the-one-you-want>
-  #
-  # The --disk flag overwrites `device` here, which is why it is never
-  # hardcoded to a real disk: a wrong value would erase the wrong drive.
-  # scripts/install.sh walks through picking it.
+  # (The `disko` command has no --disk flag — that is disko-install only — so
+  # the device has to come from the config itself, hence disk.nix.)
   #
   # WHY by-id: kernel names (/dev/sda, /dev/nvme0n1) are handed out in probe
   # order and can swap between boots. by-id is tied to the hardware itself.
 
   disko.devices.disk.main = {
     type = "disk";
-    device = "/dev/disk/by-id/PLACEHOLDER-set-via-disko-install";
+    device = disk.main;
     content = {
       type = "gpt";
       partitions = {
