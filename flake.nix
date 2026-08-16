@@ -44,10 +44,19 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Zen browser is not in nixpkgs; this community flake packages it (mirroring
+    # how Firefox is built in nixpkgs) and ships a home-manager module. It is
+    # free software, so no allowUnfree is needed for it.
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
   };
 
   outputs =
-    { self, nixpkgs, home-manager, disko, niri, dms, ... }@inputs:
+    { self, nixpkgs, home-manager, disko, niri, dms, zen-browser, ... }@inputs:
     let
       # Not hardcoded: scripts/install.sh writes this from what you type.
       user = import ./user.nix;
@@ -90,6 +99,10 @@
               sharedModules = [
                 dms.homeModules.dank-material-shell
                 dms.homeModules.niri
+                # Zen browser's home module — home/bifrost.nix uses its
+                # programs.zen-browser options. beta = the normal Zen releases
+                # (twilight is the nightly channel, twilight-official too).
+                zen-browser.homeModules.beta
               ];
             };
           }

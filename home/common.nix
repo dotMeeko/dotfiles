@@ -97,5 +97,6 @@
     neovim
     mise # per-project runtime versions
     chezmoi # only used to push dotfiles to midgard from here
+    claude-code # Anthropic CLI. Unfree — allowUnfree is set in configuration.nix
   ];
 }
