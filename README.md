@@ -22,6 +22,30 @@ one, it asks for a username and password, then partitions and installs.
 nix-shell -p git --run 'git clone <repo-url> /tmp/cfg' && sudo bash /tmp/cfg/scripts/install.sh
 ```
 
+The live ISO keeps `/nix/store` in a tmpfs sized at half the RAM, and this
+config is large enough to fill it — the build then dies with `No space left on
+device` (it is RAM, not the target disk, that ran out). `disko-install` builds
+the system in the live environment before copying it to disk, so the ceiling is
+RAM, not the 200 GB target. On a machine with plenty of memory, raise the store
+limit to use the free RAM:
+
+```bash
+sudo mount -o remount,size=14G /nix/.rw-store
+```
+
+With little RAM (e.g. an 8 GB VM), give the build somewhere to spill by adding a
+scratch disk and turning it into swap before running the installer:
+
+```bash
+lsblk                          # find the empty scratch disk, NOT the target
+sudo mkswap /dev/<scratch>
+sudo swapon /dev/<scratch>
+sudo mount -o remount,size=40G /nix/.rw-store
+```
+
+A swap file will not help: the live root is itself in RAM, and the target disk
+is wiped by `disko-install` mid-run — the swap has to be on a separate disk.
+
 **macOS** — installs chezmoi, then Homebrew and the packages on first apply.
 
 ```bash
