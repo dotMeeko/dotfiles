@@ -1,0 +1,12 @@
+; ~/.gitconfig — managed by chezmoi (template). Per-OS bits via {{ "{{" }} .chezmoi.os {{ "}}" }}.
+[user]
+	name = Meeko
+	email = dev.wladimir@gmail.com
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+{{- if eq .chezmoi.os "windows" }}
+[core]
+	autocrlf = true
+{{- end }}

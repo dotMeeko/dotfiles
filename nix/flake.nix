@@ -10,10 +10,20 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { nixpkgs, nixpkgs-unstable, home-manager, ... }:
+    {
+      nixpkgs,
+      nixpkgs-unstable,
+      home-manager,
+      disko,
+      ...
+    }:
     let
       system = "x86_64-linux";
       # Expose the unstable package set as pkgs.unstable (hybrid stable + unstable).
@@ -30,7 +40,9 @@
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
         modules = [
           { nixpkgs.overlays = [ unstableOverlay ]; }
+          disko.nixosModules.disko
           ./hosts/desktop/default.nix
+          ./hosts/desktop/disko.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;

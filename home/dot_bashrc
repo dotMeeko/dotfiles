@@ -1,0 +1,17 @@
+# ~/.bashrc — managed by chezmoi. Portable, works without Nix (any distro).
+# Keep minimal and cross-distro; machine/OS-specific bits go in templates later.
+
+# History
+HISTCONTROL=ignoreboth
+HISTSIZE=10000
+HISTFILESIZE=20000
+shopt -s histappend
+
+# Aliases
+alias ll='ls -alh'
+alias la='ls -A'
+alias gs='git status'
+alias ca='chezmoi apply'
+
+# Simple prompt
+PS1='\u@\h:\w\$ '

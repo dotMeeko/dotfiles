@@ -1,27 +1,30 @@
 # Host `desktop` — the real dual-boot PC (SSD #2 = NixOS).
-# Tested in QEMU via `nixos-rebuild build-vm .#desktop` (no separate test host).
-{ ... }:
+# Disk layout: ./disko.nix (LUKS + Btrfs). Filesystems come from disko, not here.
+# hardware-configuration.nix is generated on the machine by the install script and
+# imported only when present (so eval / build-vm work before it exists).
+{ lib, ... }:
 {
-  imports = [ ../../modules/base.nix ];
+  imports = [
+    ../../modules/base.nix
+    ../../modules/desktop-niri.nix
+    ../../modules/gpu-nvidia.nix
+  ] ++ lib.optional (builtins.pathExists ./hardware-configuration.nix) ./hardware-configuration.nix;
 
   networking.hostName = "desktop";
-
-  # Placeholder root filesystem. Replaced by disko (dot-2) and the real
-  # hardware-configuration.nix generated on the machine (`nixos-generate-config`).
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "ext4";
-  };
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # build-vm only: headless, WSL2-friendly settings. Does not affect the real system.
-  virtualisation.vmVariant.virtualisation = {
-    graphics = false; # serial console (ttyS0) so the boot can be read headless
-    # WSL2's virtiofs host share is unreliable; pack the Nix store into a disk
-    # image instead of sharing the host store over virtiofs.
-    useNixStoreImage = true;
-    writableStore = false;
+  # build-vm only: headless, WSL2-friendly, throwaway login password.
+  # Does not affect the real system.
+  virtualisation.vmVariant = {
+    # No hashedPasswordFile in the VM; use a throwaway password so login works.
+    users.users.meeko.hashedPasswordFile = lib.mkForce null;
+    users.users.meeko.initialPassword = "changeme";
+    virtualisation = {
+      graphics = false; # serial console (ttyS0) so the boot can be read headless
+      useNixStoreImage = true; # avoid WSL2's unreliable virtiofs host-store share
+      writableStore = true; # writable store overlay so HM / nix-path registration works
+    };
   };
 }

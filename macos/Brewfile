@@ -1,0 +1,16 @@
+# Brewfile — macOS packages, installed with `brew bundle --file ~/…/Brewfile`.
+# macOS uses Homebrew (no Nix); configs still come from chezmoi.
+
+tap "homebrew/bundle"
+
+# CLI
+brew "git"
+brew "neovim"
+brew "chezmoi"
+brew "ripgrep"
+brew "fzf"
+brew "fd"
+
+# Apps
+cask "firefox"
+cask "ghostty"

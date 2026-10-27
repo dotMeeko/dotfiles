@@ -1,0 +1,8 @@
+# Per-OS include/exclude, templated by chezmoi. On this machine, files meant for
+# other operating systems are ignored (so one source tree serves all OSes).
+
+{{- if ne .chezmoi.os "windows" }}
+# Windows-only trees (ignored entirely when not on Windows)
+Documents
+AppData
+{{- end }}

@@ -11,7 +11,8 @@
   networking.networkmanager.enable = true;
 
   # User. On a real install the password is set by the install script (dot-3)
-  # as a hash via users.users.<name>.hashedPassword; this is a temporary VM password.
+  # as a hashed-password file written to the installed system (never in this repo).
+  # The VM variant (hosts/desktop) overrides it with a throwaway password for tests.
   users.users.meeko = {
     isNormalUser = true;
     description = "Meeko";
@@ -19,13 +20,17 @@
       "wheel"
       "networkmanager"
     ];
-    initialPassword = "changeme";
+    hashedPasswordFile = "/etc/secrets/user-password";
   };
 
   services.openssh.enable = true;
 
   # sudo for the wheel group, password required
   security.sudo.wheelNeedsPassword = true;
+
+  # Hardware basics (this machine: AMD Ryzen 7800X3D).
+  hardware.enableRedistributableFirmware = true;
+  hardware.cpu.amd.updateMicrocode = true;
 
   # Do not change after the system's first install.
   system.stateVersion = "26.05";
