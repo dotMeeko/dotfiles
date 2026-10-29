@@ -33,23 +33,31 @@
           config.allowUnfree = true;
         };
       };
+
+      # Build a host by ROLE (the flake attribute = the role, NOT the machine name).
+      # The machine name (networking.hostName) is a parameter, set at install time
+      # into hosts/<role>/machine.nix — renaming a machine never touches this flake.
+      mkHost =
+        role:
+        nixpkgs.lib.nixosSystem {
+          modules = [
+            { nixpkgs.overlays = [ unstableOverlay ]; }
+            disko.nixosModules.disko
+            ./hosts/${role}/default.nix
+            ./hosts/${role}/disko.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.meeko = import ./home/packages.nix;
+            }
+          ];
+        };
     in
     {
-      # Real host: the dual-boot PC (SSD #2 = NixOS).
-      # Test it in QEMU with `nixos-rebuild build-vm .#desktop`.
-      nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
-        modules = [
-          { nixpkgs.overlays = [ unstableOverlay ]; }
-          disko.nixosModules.disko
-          ./hosts/desktop/default.nix
-          ./hosts/desktop/disko.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.meeko = import ./home/packages.nix;
-          }
-        ];
+      # One entry per ROLE. Add `server = mkHost "server";` when a server exists.
+      nixosConfigurations = {
+        desktop = mkHost "desktop";
       };
     };
 }

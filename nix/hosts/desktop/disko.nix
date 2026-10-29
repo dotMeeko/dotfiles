@@ -1,6 +1,8 @@
-# LUKS + Btrfs disk layout for `desktop`.
-# device = /dev/vda for VM tests; the install script (dot-8) overrides it with the
-# real target disk and supplies the LUKS passphrase (passwordFile).
+# LUKS + Btrfs disk layout for the `desktop` role.
+# device = /dev/vda is a placeholder for eval/build-vm; the install script overrides
+# it with the real target disk and supplies the LUKS passphrase (passwordFile).
+# Filesystems are addressed by partlabel, so the placeholder device does not affect
+# the installed system.
 { ... }:
 {
   imports = [

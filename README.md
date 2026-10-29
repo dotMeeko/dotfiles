@@ -18,8 +18,9 @@ home/                 chezmoi source, applied on all OSes
   Documents/PowerShell/   Windows PowerShell profile
 nix/                  NixOS (flake)
   flake.nix           hybrid: stable nixos-26.05 + nixpkgs-unstable overlay
-  hosts/desktop/      host config + LUKS+Btrfs disko layout
-  modules/            base system, Niri desktop
+  hosts/desktop/      per-role config (+ disko.nix: LUKS+Btrfs)
+  disko/luks-btrfs.nix   reusable disk layout
+  modules/            base system, Niri desktop, NVIDIA GPU
   home/packages.nix   home-manager: home.packages only
   bootstrap/install-nixos.sh   guided installer (disk pick + confirm)
 macos/Brewfile        macOS packages
@@ -30,21 +31,21 @@ macos/Brewfile        macOS packages
 **NixOS** (from the live ISO):
 
 ```sh
-git clone <repo-url> dotfiles && cd dotfiles
-sudo nix --experimental-features "nix-command flakes" \
-  run nixpkgs#bash -- nix/bootstrap/install-nixos.sh
-# prompts hostname/username/password, pick the target disk (confirm by name),
-# partitions LUKS+Btrfs via disko, then nixos-install. Reboot afterwards.
+git clone https://github.com/dotMeeko/dotfiles.git && cd dotfiles
+./install.sh
+# asks: build (desktop), machine name, password, target disk (confirm by name),
+# then partitions LUKS+Btrfs via disko and runs nixos-install. User `meeko` is fixed
+# in the flake; the machine name is yours to pick (no hardcode). Reboot afterwards.
 ```
 
 Then, on any OS, lay down the dotfiles:
 
 ```sh
-chezmoi init --apply <repo-url>
+chezmoi init --apply dotMeeko/dotfiles
 ```
 
-- **macOS:** `brew bundle --file macos/Brewfile`, then `chezmoi init --apply`.
-- **Windows:** install chezmoi (scoop), then `chezmoi init --apply`.
+- **macOS:** `chezmoi init --apply dotMeeko/dotfiles`, then `brew bundle --file ~/.local/share/chezmoi/macos/Brewfile`.
+- **Windows:** install chezmoi (scoop), then `chezmoi init --apply dotMeeko/dotfiles`.
 
 ## Notes
 

@@ -1,16 +1,18 @@
-# Host `desktop` — the real dual-boot PC (SSD #2 = NixOS).
-# Disk layout: ./disko.nix (LUKS + Btrfs). Filesystems come from disko, not here.
-# hardware-configuration.nix is generated on the machine by the install script and
-# imported only when present (so eval / build-vm work before it exists).
+# Role `desktop` — graphical workstation (Niri + NVIDIA).
+# The machine NAME is not set here: it comes from the generated machine.nix
+# (written by the installer), so renaming the machine never touches this file.
+# hardware-configuration.nix is also generated on the machine. Both are imported
+# only when present, so eval / build-vm work before they exist.
 { lib, ... }:
 {
-  imports = [
-    ../../modules/base.nix
-    ../../modules/desktop-niri.nix
-    ../../modules/gpu-nvidia.nix
-  ] ++ lib.optional (builtins.pathExists ./hardware-configuration.nix) ./hardware-configuration.nix;
-
-  networking.hostName = "desktop";
+  imports =
+    [
+      ../../modules/base.nix
+      ../../modules/desktop-niri.nix
+      ../../modules/gpu-nvidia.nix
+    ]
+    ++ lib.optional (builtins.pathExists ./hardware-configuration.nix) ./hardware-configuration.nix
+    ++ lib.optional (builtins.pathExists ./machine.nix) ./machine.nix;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -18,7 +20,6 @@
   # build-vm only: headless, WSL2-friendly, throwaway login password.
   # Does not affect the real system.
   virtualisation.vmVariant = {
-    # No hashedPasswordFile in the VM; use a throwaway password so login works.
     users.users.meeko.hashedPasswordFile = lib.mkForce null;
     users.users.meeko.initialPassword = "changeme";
     virtualisation = {
