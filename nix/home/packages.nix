@@ -9,10 +9,11 @@
     # Standard GTK file manager.
     pkgs.nautilus
 
-    # Claude Code — from unstable (frequent releases; unfree allowed in the unstable overlay).
-    pkgs.unstable.claude-code
+    # Claude Code — from stable 26.05 (unfree, allowed via allowUnfreePredicate).
+    pkgs.claude-code
 
-    # Zen browser — package from the flake (no programs.* so chezmoi keeps owning the config).
-    inputs.zen-browser.packages.${pkgs.system}.default
+    # Zen browser — "beta" is Zen's public release channel (NOT a pre-release; twilight is the
+    # nightly). Package only (no programs.*), so chezmoi keeps owning the config.
+    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta
   ];
 }

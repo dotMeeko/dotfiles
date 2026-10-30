@@ -175,6 +175,12 @@ if [ "${INSTALL_SKIP_NIXOS_INSTALL:-0}" = "1" ]; then
   exit 0
 fi
 
+# Lock inputs NOW (fetches any newly added ones). This MUST happen before the build:
+# the build uses `path:`, so if Nix rewrote flake.lock mid-build it would mutate the
+# directory and abort with "NAR hash mismatch in input 'path:...'".
+msg "Locking flake inputs"
+nix --experimental-features "nix-command flakes" flake lock "$FLAKE_DIR"
+
 # `path:` makes Nix read the directory as-is (incl. the just-generated untracked files).
 msg "Installing NixOS (build '$role', machine '$machine')"
 nixos-install --root "$ROOT" --flake "path:$FLAKE_DIR#$role" --no-root-passwd

@@ -2,13 +2,14 @@
 # so the dGPU drives the display directly (no iGPU offload).
 { config, lib, ... }:
 {
-  # The NVIDIA driver is unfree — allow just the NVIDIA packages, not everything.
+  # Allow only specific unfree packages, not everything: the NVIDIA driver and Claude Code.
   nixpkgs.config.allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
       "nvidia-x11"
       "nvidia-settings"
       "nvidia-persistenced"
+      "claude-code"
     ];
 
   services.xserver.videoDrivers = [ "nvidia" ];
