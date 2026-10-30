@@ -1,11 +1,10 @@
 # Reusable system base — shared by all NixOS hosts/roles.
-{ lib, ... }:
+{ config, lib, ... }:
 {
   nixpkgs.hostPlatform = "x86_64-linux";
 
   # Default machine name. Overridden by the generated hosts/<role>/machine.nix
-  # (written by the installer) — so renaming a machine is a one-line change, not
-  # a structural one.
+  # (written by the installer) — renaming a machine is a one-line change.
   networking.hostName = lib.mkDefault "nixos";
 
   # Locale and time
@@ -15,12 +14,11 @@
   # Networking
   networking.networkmanager.enable = true;
 
-  # User. The real password hash is written by the install script to a file on the
-  # installed system — never committed to this (public) repo. The VM variant
-  # overrides this with a throwaway password for headless boot tests.
-  users.users.meeko = {
+  # Primary user. Name comes from config.my.username (set by the installer's user.nix).
+  # The password hash is written by the installer to a file on the installed system,
+  # never committed to this repo.
+  users.users.${config.my.username} = {
     isNormalUser = true;
-    description = "Meeko";
     extraGroups = [
       "wheel"
       "networkmanager"

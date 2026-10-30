@@ -1,11 +1,11 @@
-# LUKS + Btrfs disk layout for the `desktop` role.
-# device = /dev/vda is a placeholder for eval/build-vm; the install script overrides
-# it with the real target disk and supplies the LUKS passphrase (passwordFile).
-# Filesystems are addressed by partlabel, so the placeholder device does not affect
-# the installed system.
+# Disk layout for the `desktop` role. Default is a placeholder for eval / build-vm;
+# the installer REGENERATES this file with the real device and the encrypt choice.
 { ... }:
 {
   imports = [
-    (import ../../disko/luks-btrfs.nix { device = "/dev/vda"; })
+    (import ../../disko/main.nix {
+      device = "/dev/vda";
+      encrypt = false;
+    })
   ];
 }

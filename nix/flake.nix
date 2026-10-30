@@ -4,7 +4,7 @@
   inputs = {
     # Stable base for the system.
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
-    # Unstable, exposed as pkgs.unstable for packages that must be fresh (e.g. Niri).
+    # Unstable, exposed as pkgs.unstable for packages that must be fresh.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -14,14 +14,22 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Niri compositor via niri-flake (nixos session + home-manager config/lib).
+    niri.url = "github:sodiboo/niri-flake";
+    # DankMaterialShell — Quickshell desktop shell over Niri (preconfigured).
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    {
+    inputs@{
       nixpkgs,
       nixpkgs-unstable,
       home-manager,
       disko,
+      niri,
       ...
     }:
     let
@@ -35,22 +43,21 @@
       };
 
       # Build a host by ROLE (the flake attribute = the role, NOT the machine name).
-      # The machine name (networking.hostName) is a parameter, set at install time
-      # into hosts/<role>/machine.nix — renaming a machine never touches this flake.
+      # Machine name, user name and disk layout are parameters, set at install time
+      # into hosts/<role>/{machine,user,disko}.nix — renaming never touches this flake.
       mkHost =
         role:
         nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
           modules = [
             { nixpkgs.overlays = [ unstableOverlay ]; }
             disko.nixosModules.disko
+            niri.nixosModules.niri
+            home-manager.nixosModules.home-manager
+            ./modules/options.nix
+            ./modules/home.nix
             ./hosts/${role}/default.nix
             ./hosts/${role}/disko.nix
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.meeko = import ./home/packages.nix;
-            }
           ];
         };
     in

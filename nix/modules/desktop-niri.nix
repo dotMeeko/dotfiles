@@ -1,15 +1,13 @@
-# Desktop: Niri Wayland compositor + a login manager + minimal Wayland packages.
-# Nix installs the software; the Niri config itself is a dotfile managed by chezmoi.
-# Niri comes from the unstable overlay (pkgs.unstable) to stay fresh.
+# Desktop session: Niri (from niri-flake) + a login manager.
+# Niri config and the DankMaterialShell integration live in home-manager (modules/home.nix);
+# Nix only installs the software here.
 { pkgs, ... }:
 {
+  # Niri compositor, enabled system-wide for the session / greetd (package from niri-flake).
+  programs.niri.enable = true;
+
   # GPU / graphics stack (needed by any Wayland compositor).
   hardware.graphics.enable = true;
-
-  programs.niri = {
-    enable = true;
-    package = pkgs.unstable.niri;
-  };
 
   # Log in through greetd into a Niri session.
   services.greetd = {
@@ -20,10 +18,6 @@
     };
   };
 
-  # Minimal Wayland desktop tools (install only; their configs come from chezmoi).
-  environment.systemPackages = with pkgs; [
-    foot # terminal
-    fuzzel # application launcher
-    waybar # status bar
-  ];
+  # Terminal only — DMS provides the bar, launcher, notifications, etc.
+  environment.systemPackages = with pkgs; [ foot ];
 }
