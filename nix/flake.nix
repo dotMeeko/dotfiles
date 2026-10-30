@@ -21,6 +21,20 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # DankGreeter — greetd login screen in the DMS style (Material 3, theme-synced).
+    # The `services.displayManager.dms-greeter` module lives in THIS flake, not nixpkgs.
+    dank-greeter = {
+      url = "github:AvengeMedia/dank-greeter";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Zen browser — not in nixpkgs; community flake. Package only (chezmoi owns configs).
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        home-manager.follows = "home-manager";
+      };
+    };
   };
 
   outputs =

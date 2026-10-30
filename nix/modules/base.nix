@@ -19,6 +19,8 @@
   # never committed to this repo.
   users.users.${config.my.username} = {
     isNormalUser = true;
+    # Display name (GECOS) shown by the greeter. Empty -> the login name is shown.
+    description = config.my.fullName;
     extraGroups = [
       "wheel"
       "networkmanager"

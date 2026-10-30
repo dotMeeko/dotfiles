@@ -26,6 +26,9 @@
   };
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # NTFS support so os-prober can mount and identify the Windows partition (dual-boot).
+  boot.supportedFilesystems.ntfs = true;
+
   # build-vm only: headless, WSL2-friendly, throwaway login password.
   # Does not affect the real system.
   virtualisation.vmVariant = {

@@ -5,7 +5,8 @@
 # user name and disk layout are generated into hosts/<role>/{machine,user,disko}.nix.
 #
 # Non-interactive (tests): INSTALL_NONINTERACTIVE=1 + INSTALL_ROLE / INSTALL_HOSTNAME /
-# INSTALL_USER / INSTALL_PASSWORD / INSTALL_DISK / INSTALL_ENCRYPT(0|1) [INSTALL_DISKPASS].
+# INSTALL_USER / INSTALL_PASSWORD / INSTALL_DISK / INSTALL_ENCRYPT(0|1) [INSTALL_DISKPASS]
+# [INSTALL_FULLNAME].
 # INSTALL_SKIP_NIXOS_INSTALL=1 stops before nixos-install.
 set -euo pipefail
 
@@ -107,6 +108,7 @@ if [ "${INSTALL_NONINTERACTIVE:-0}" = "1" ]; then
   role="${INSTALL_ROLE:?set INSTALL_ROLE}"
   machine="${INSTALL_HOSTNAME:?set INSTALL_HOSTNAME}"
   username="${INSTALL_USER:?set INSTALL_USER}"
+  fullname="${INSTALL_FULLNAME:-}"
   password="${INSTALL_PASSWORD:?set INSTALL_PASSWORD}"
   disk="${INSTALL_DISK:?set INSTALL_DISK}"
   [ "${INSTALL_ENCRYPT:-0}" = "1" ] && encrypt=true || encrypt=false
@@ -115,6 +117,7 @@ else
   select_role
   while :; do read -rp "Machine name (hostname): " machine; [ -n "$machine" ] && break; echo "Required, try again." >&2; done
   while :; do read -rp "User name: " username; [[ "$username" =~ ^[a-z_][a-z0-9_-]*$ ]] && break; echo "Invalid user name (lowercase letters/digits/_/-), try again." >&2; done
+  read -rp "Full name (shown on the login screen, optional): " fullname
   read_password_twice "Password for $username"; password="$REPLY_PW"
   read -rp "Encrypt the disk? (asks a separate disk password at every boot) [y/N]: " enc
   case "$enc" in [yY]*) encrypt=true;; *) encrypt=false;; esac
@@ -154,7 +157,7 @@ msg "Generating per-machine files for build '$role' (name '$machine', user '$use
 nixos-generate-config --no-filesystems --root "$ROOT"
 install -D "$ROOT/etc/nixos/hardware-configuration.nix" "$FLAKE_DIR/hosts/$role/hardware-configuration.nix"
 printf '{ networking.hostName = "%s"; }\n' "$machine" > "$FLAKE_DIR/hosts/$role/machine.nix"
-printf '{ my.username = "%s"; }\n' "$username" > "$FLAKE_DIR/hosts/$role/user.nix"
+printf '{ my.username = "%s"; my.fullName = "%s"; }\n' "$username" "$fullname" > "$FLAKE_DIR/hosts/$role/user.nix"
 cat > "$FLAKE_DIR/hosts/$role/disko.nix" <<EOF
 { ... }:
 {
