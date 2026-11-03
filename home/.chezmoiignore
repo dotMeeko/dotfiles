@@ -6,3 +6,8 @@
 Documents
 AppData
 {{- end }}
+
+{{- if ne .chezmoi.os "linux" }}
+# Linux-only (niri is a Wayland compositor)
+.config/niri
+{{- end }}

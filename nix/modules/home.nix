@@ -1,6 +1,6 @@
 # home-manager wiring for the primary user (name comes from config.my.username).
 # Niri config + DankMaterialShell integration live here (home-manager).
-{ config, inputs, ... }:
+{ config, lib, inputs, ... }:
 {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
@@ -17,6 +17,11 @@
     home.username = config.my.username;
     home.homeDirectory = "/home/${config.my.username}";
     home.stateVersion = "26.05";
+
+    # config.kdl is hand-owned (chezmoi deploys it, see home/dot_config/niri/).
+    # HM must not link it, or activation dies at checkLinkTargets and the whole
+    # HM file layer silently stops applying.
+    xdg.configFile."niri-config".enable = lib.mkForce false;
 
     # DankMaterialShell — preconfigured Quickshell desktop shell over Niri.
     # Wire keybinds + autostart directly (and disable the overlapping `includes`).

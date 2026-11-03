@@ -9,6 +9,17 @@
     # Standard GTK file manager.
     pkgs.nautilus
 
+    # chezmoi — owns all dotfiles per the README; was never actually installed,
+    # so the whole home/ layer had never been deployed.
+    pkgs.chezmoi
+
+    # X11 apps under niri. niri 25.08 spawns this from PATH by itself
+    # (log showed "error spawning xwayland-satellite, disabling integration").
+    pkgs.xwayland-satellite
+
+    # Real cursor theme — config.kdl referenced a non-existent "default".
+    pkgs.adwaita-icon-theme
+
     # Claude Code — from stable 26.05 (unfree, allowed via allowUnfreePredicate).
     pkgs.claude-code
 
