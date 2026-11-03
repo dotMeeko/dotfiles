@@ -14,15 +14,6 @@
   # Networking
   networking.networkmanager.enable = true;
 
-  # mDNS resolution, so peers can be reached by <name>.local instead of a DHCP
-  # address that changes. macOS publishes its own .local name out of the box, so
-  # waynergy can point at the Mac by name and survive a lease change.
-  services.avahi = {
-    enable = true;
-    nssmdns4 = true;
-    openFirewall = true;
-  };
-
   # Primary user. Name comes from config.my.username (set by the installer's user.nix).
   # The password hash is written by the installer to a file on the installed system,
   # never committed to this repo.

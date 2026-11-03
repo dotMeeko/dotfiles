@@ -30,9 +30,6 @@
     # logs "wl-clipboard not found, no clipboard synchronization support".
     pkgs.wl-clipboard
 
-    # avahi-browse / avahi-resolve, for finding the Mac's .local name on the LAN.
-    pkgs.avahi
-
     # Claude Code — from stable 26.05 (unfree, allowed via allowUnfreePredicate).
     pkgs.claude-code
 

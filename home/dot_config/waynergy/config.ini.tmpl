@@ -8,7 +8,10 @@
 # Trade-off: kernel input bypasses the compositor's access control, so a lock
 # screen is no longer a hard barrier while a session is active.
 
-host = 192.168.50.209
+# Address of the machine running Deskflow. Machine-specific, so it lives in
+# ~/.config/chezmoi/chezmoi.toml under [data] and not in this repo — same idea as
+# hosts/desktop/machine.nix keeping the hostname out of the shared modules.
+host = {{ .deskflowServer }}
 name = odin
 port = 24800
 backend = uinput
