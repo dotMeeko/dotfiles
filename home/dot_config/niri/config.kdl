@@ -2,6 +2,11 @@ input {
     keyboard {
         xkb {
             layout "us,ru"
+            // Alt+Shift switches layout at the xkb level, below niri's bind matching.
+            // A niri bind cannot do this reliably: with a non-Latin layout active,
+            // Mod+Space stops matching, so the bind meant to switch away from it
+            // is itself unreachable.
+            options "grp:alt_shift_toggle"
             model ""
             rules ""
             variant ""
@@ -130,3 +135,4 @@ binds {
     Alt+Print { screenshot-window; }
 }
 spawn-at-startup "dms" "run"
+// DMS Include Configs

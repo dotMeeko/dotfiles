@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Keyboard Sharing (toggle)
+Comment=Turn the Mac's keyboard and mouse on or off for this machine
+Icon=input-keyboard
+Exec=waynergy-toggle
+Terminal=false
+Categories=Utility;
+Keywords=waynergy;synergy;deskflow;kvm;keyboard;mouse;share;

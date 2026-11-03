@@ -20,6 +20,19 @@
     # Real cursor theme — config.kdl referenced a non-existent "default".
     pkgs.adwaita-icon-theme
 
+    # KVM: Synergy-1-protocol client with a uinput backend — the only Linux client
+    # that injects below Wayland, so niri's own keybinds work from remote input.
+    # Pairs with Deskflow (or Synergy 1) as the server; Synergy 3 speaks only to
+    # Synergy 3 and cannot be used here.
+    pkgs.waynergy
+
+    # waynergy shells out to wl-copy/wl-paste for clipboard sync; without it it
+    # logs "wl-clipboard not found, no clipboard synchronization support".
+    pkgs.wl-clipboard
+
+    # avahi-browse / avahi-resolve, for finding the Mac's .local name on the LAN.
+    pkgs.avahi
+
     # Claude Code — from stable 26.05 (unfree, allowed via allowUnfreePredicate).
     pkgs.claude-code
 

@@ -1,0 +1,28 @@
+[Unit]
+# waynergy: Synergy/Barrier-protocol client. Server is Deskflow on the Mac.
+#
+# Why waynergy and not Deskflow's own client: on niri the portal route is a dead
+# end. niri ships no RemoteDesktop portal (niri-wm/niri#1966 is still open), and
+# input injected through zwp_virtual_keyboard_v1 does not trigger the compositor's
+# own keybinds until the fix merged upstream 2026-10-13 reaches a release — 26.04
+# predates it. waynergy's uinput backend writes to /dev/uinput instead, so the
+# kernel creates a real input device and niri handles it like any keyboard,
+# keybinds included.
+Description=waynergy - share the Mac's keyboard and mouse with this machine
+Documentation=https://github.com/r-c-f/waynergy
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# Everything (host, screen name, backend, TLS, keymap) lives in
+# ~/.config/waynergy/config.ini and config.ini.d/, deployed by chezmoi.
+ExecStart=/etc/profiles/per-user/meeko/bin/waynergy
+Restart=on-failure
+RestartSec=3
+# The Mac may be asleep or Deskflow not yet running; keep retrying rather than
+# giving up after the default burst limit.
+StartLimitBurst=0
+
+[Install]
+WantedBy=graphical-session.target
