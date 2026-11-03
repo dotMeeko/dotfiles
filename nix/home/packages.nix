@@ -33,6 +33,16 @@
     # Claude Code — from stable 26.05 (unfree, allowed via allowUnfreePredicate).
     pkgs.claude-code
 
+    # Needed on PATH by local tooling kept outside this repo: jq by engram's setup
+    # command, python3 by a hook that parses JSON payloads (without it the fallback
+    # greps the whole blob and over-matches).
+    pkgs.python3
+    pkgs.jq
+
+    # engram — MCP memory server over SQLite. Pinned release tarball, not in nixpkgs;
+    # see ../pkgs/engram.nix.
+    (pkgs.callPackage ../pkgs/engram.nix { })
+
     # Zen browser — "beta" is Zen's public release channel (NOT a pre-release; twilight is the
     # nightly). Package only (no programs.*), so chezmoi keeps owning the config.
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta

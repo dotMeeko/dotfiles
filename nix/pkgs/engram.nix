@@ -1,7 +1,6 @@
 # engram — persistent memory for AI coding agents (SQLite + FTS5, MIT).
 # Not in nixpkgs (only engrampa/geogram match the name), so we pin the upstream
 # release tarball. The binary is fully static Go, so no autoPatchelfHook needed.
-# Jarvis uses it as the "operational memory" layer; see Jarvis/System/Engram.md.
 {
   lib,
   stdenvNoCC,

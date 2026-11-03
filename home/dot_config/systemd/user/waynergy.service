@@ -17,7 +17,11 @@ PartOf=graphical-session.target
 Type=simple
 # Everything (host, screen name, backend, TLS, keymap) lives in
 # ~/.config/waynergy/config.ini and config.ini.d/, deployed by chezmoi.
-ExecStart=/etc/profiles/per-user/meeko/bin/waynergy
+#
+# %u is the systemd specifier for the user running the unit, so the path holds on
+# any username. home-manager runs as a NixOS module here, which puts user packages
+# under /etc/profiles/per-user/<user>/bin rather than ~/.nix-profile.
+ExecStart=/etc/profiles/per-user/%u/bin/waynergy
 Restart=on-failure
 RestartSec=3
 # The Mac may be asleep or Deskflow not yet running; keep retrying rather than

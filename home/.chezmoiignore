@@ -8,6 +8,12 @@ AppData
 {{- end }}
 
 {{- if ne .chezmoi.os "linux" }}
-# Linux-only (niri is a Wayland compositor)
+# Linux-only: niri is a Wayland compositor, systemd user units and the waynergy
+# toggle exist nowhere else, and .local/share/applications is the XDG desktop-entry
+# path (macOS and Windows have their own).
 .config/niri
+.config/systemd
+.config/waynergy
+.local/bin/waynergy-toggle
+.local/share/applications
 {{- end }}

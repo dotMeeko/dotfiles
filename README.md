@@ -3,7 +3,7 @@
 Cross-platform dotfiles for **NixOS**, **macOS** and **Windows**.
 
 **Split of responsibilities:** Nix installs packages and builds the NixOS system;
-Homebrew does packages on macOS; scoop/winget on Windows. **chezmoi owns all
+Homebrew does packages on macOS; winget on Windows. **chezmoi owns all
 dotfiles** on every OS — configs stay plain and portable (no Nix needed to edit them).
 
 ## Layout
@@ -19,11 +19,13 @@ home/                 chezmoi source, applied on all OSes
 nix/                  NixOS (flake)
   flake.nix           hybrid: stable nixos-26.05 + nixpkgs-unstable overlay
   hosts/desktop/      per-role config (+ disko.nix: LUKS+Btrfs)
-  disko/luks-btrfs.nix   reusable disk layout
+  disko/main.nix      reusable disk layout (LUKS + Btrfs)
   modules/            base system, Niri desktop, NVIDIA GPU
   home/packages.nix   home-manager: home.packages only
+  pkgs/               packages missing from nixpkgs, pinned by release hash
   bootstrap/install-nixos.sh   guided installer (disk pick + confirm)
 macos/Brewfile        macOS packages
+windows/packages.ps1  Windows packages (winget)
 ```
 
 ## Install
@@ -44,8 +46,11 @@ Then, on any OS, lay down the dotfiles:
 chezmoi init --apply dotMeeko/dotfiles
 ```
 
-- **macOS:** `chezmoi init --apply dotMeeko/dotfiles`, then `brew bundle --file ~/.local/share/chezmoi/macos/Brewfile`.
-- **Windows:** install chezmoi (scoop), then `chezmoi init --apply dotMeeko/dotfiles`.
+- **macOS:** `chezmoi init --apply dotMeeko/dotfiles`, then
+  `brew bundle --file ~/.local/share/chezmoi/macos/Brewfile`.
+- **Windows:** `winget install twpayne.chezmoi`, then `chezmoi init --apply dotMeeko/dotfiles`,
+  then `pwsh -File %USERPROFILE%\.local\share\chezmoi\windows\packages.ps1` for the rest of the
+  software (`-WhatIf` lists it without installing).
 
 ## Notes
 
