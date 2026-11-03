@@ -22,6 +22,11 @@
     configHome = "/home/${config.my.username}";
   };
 
+  # Flatpak — needed for Synergy 3, which Symless ships only as a .flatpak bundle
+  # (not on Flathub). The bundle wants org.kde.Platform 6.10 + an Electron base,
+  # so the flathub remote has to be added once to resolve those runtimes.
+  services.flatpak.enable = true;
+
   # Terminal only — DMS provides the bar, launcher, notifications, etc.
   environment.systemPackages = with pkgs; [ ghostty ];
 }
