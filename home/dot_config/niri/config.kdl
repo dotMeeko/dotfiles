@@ -2,11 +2,24 @@ input {
     keyboard {
         xkb {
             layout "us,ru"
-            // Alt+Shift switches layout at the xkb level, below niri's bind matching.
-            // A niri bind cannot do this reliably: with a non-Latin layout active,
-            // Mod+Space stops matching, so the bind meant to switch away from it
-            // is itself unreachable.
-            options "grp:alt_shift_toggle"
+            // Layout switching happens HERE, at the xkb level, below niri's bind
+            // matching — a niri bind cannot do it reliably: with a non-Latin layout
+            // active, Mod+Space stops matching, so the bind meant to switch away
+            // from it is itself unreachable.
+            //
+            // The value must match ~/.config/dms/settings.json `keyboardOptions`,
+            // because DMS regenerates dms/input.kdl from it and that file is
+            // included at the END of this config — so DMS wins any disagreement.
+            // This file said alt_shift_toggle while DMS said win_space_toggle, which
+            // left Alt+Shift silently dead. Change it with
+            //   dms ipc call settings set keyboardOptions <value>
+            // and mirror it here, not the other way round.
+            //
+            // Super+Space is Option+Space on the Mac keyboard: the waynergy
+            // raw-keymap remaps Mac modifiers (Option -> Super, Command -> Control,
+            // Control -> Alt), so this stays reachable over Deskflow and does not
+            // collide with Spotlight, which arrives as Control+Space.
+            options "grp:win_space_toggle"
             model ""
             rules ""
             variant ""
@@ -45,7 +58,6 @@ binds {
     Mod+N hotkey-overlay-title="Toggle Notification Center" { spawn "dms" "ipc" "notifications" "toggle"; }
     Mod+P hotkey-overlay-title="Toggle Notepad" { spawn "dms" "ipc" "notepad" "toggle"; }
     Alt+Space hotkey-overlay-title="Toggle Application Launcher" { spawn "dms" "ipc" "spotlight" "toggle"; }
-    Mod+Space hotkey-overlay-title="Switch Keyboard Layout" { switch-layout "next"; }
     Mod+V hotkey-overlay-title="Toggle Clipboard Manager" { spawn "dms" "ipc" "clipboard" "toggle"; }
     Mod+X hotkey-overlay-title="Toggle Power Menu" { spawn "dms" "ipc" "powermenu" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Toggle Lock Screen" { spawn "dms" "ipc" "lock" "lock"; }
@@ -136,3 +148,15 @@ binds {
 }
 spawn-at-startup "dms" "run"
 // DMS Include Configs
+// Written here by DMS itself whenever its settings UI touches input. It has to
+// live in the repo too, otherwise `chezmoi apply` silently deletes it and every
+// DMS input setting stops applying. Only `include` lines belong here — the
+// dms/*.kdl files themselves are generated and must not be checked in.
+//
+// optional=true (niri 26.04+) is load-bearing on a fresh machine: chezmoi writes
+// this file before DMS has ever run, and a non-optional include of a missing file
+// fails the WHOLE config, which means no session at all. DMS does not mind — it
+// looks for its line with the regex include.*"dms/input.kdl"
+// (Common/ConfigIncludeResolve.js), which this still matches, so it will not
+// append a duplicate.
+include "dms/input.kdl" optional=true

@@ -16,6 +16,38 @@ name = odin
 port = 24800
 backend = uinput
 
+# Screen geometry is NOT pinned here — waynergy tracks the outputs itself.
+#
+# How it works: Deskflow sends ABSOLUTE cursor coordinates, the uinput backend
+# emits EV_ABS over the range 0..<size waynergy reported to the server>, and niri
+# maps that range onto the bounding box of all outputs
+# (input/mod.rs: position_transformed on global_bounding_rectangle). So pointer
+# sensitivity is exactly real_width / reported_width, and the reported width has
+# to follow the actual layout to stay 1:1. Tracking does that for free — the 4K on
+# DP-2 can be plugged in and unplugged and the mouse keeps its scale, because
+# waynergy recomputes on every output change and pushes the new size to the server
+# (main.c: uSynergyUpdateRes + wlResUpdate from the output-update callback).
+#
+# Setting `width`/`height` would freeze it instead, and freezing is wrong here:
+# the correct value differs per monitor set — 1920x1080 for DP-3 alone, 4992x1728
+# with the 4K on (3840/1.25 = 3072 logical plus 1920; 2160/1.25 = 1728) — so a
+# frozen value is guaranteed to be wrong half the time, off by the ratio.
+#
+# THE ONE FAILURE MODE, because it already bit once: waynergy measures the
+# bounding box FROM ZERO, max(x+w) - min(0,x). DMS keeps per-monitor-set profiles,
+# and if it leaves the two-monitor profile applied while the 4K is physically off,
+# DP-3 stays parked at x=3072 — its slot right of the 4K — and the reported screen
+# becomes 4992x1080 for a 1920x1080 panel. Horizontal motion then runs
+# 1920/4992 = 0.385, i.e. 2.6x too slow, while vertical stays 1:1; an anisotropic
+# mouse is the signature of this and of nothing else.
+#
+# Diagnosis, one command each:
+#   journalctl --user -u waynergy | grep "Geometry updated"   <- what waynergy sees
+#   niri msg outputs | grep "Logical position"                <- a lone monitor
+#                                                                must sit at 0,0
+# The fix is to make DMS apply the profile that matches reality, NOT to move the
+# monitor to 0,0 by hand: x=3072 is correct whenever the 4K is actually on.
+
 [tls]
 # Deskflow 1.27 TLS does not negotiate with waynergy (tls_close error, instant
 # receive timeout). Disable encryption on BOTH sides; known-good combination.
@@ -23,7 +55,11 @@ enable = false
 tofu = false
 
 [log]
-level = 2
+# info, not warn: level 2 hides the "Geometry updated: WxH" line, and that single
+# line is what makes the phantom-gap failure above diagnosable instead of a
+# guessing game. waynergy logs at info only on startup, geometry changes and
+# connection events, so the journal stays readable.
+level = 3
 
 # uinput does not go through xkb, so keycodes coming from a macOS server have to
 # be mapped explicitly. Generate this section with:
