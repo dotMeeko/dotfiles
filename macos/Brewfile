@@ -16,6 +16,15 @@ brew "jq"
 cask "firefox"
 cask "ghostty"
 
+# Zen — the same browser the other two OSes get, so all three stay in step:
+# cask 1.24.1b here, Zen-Team.Zen-Browser 1.24.1b on winget, and the flake in
+# nix/home/packages.nix pins the same release.
+#
+# The cask is "zen", NOT "zen-browser" — that name 404s. And winget carries a
+# separate "Twilight" version, which is Zen's nightly channel; the numbered
+# releases are the public ones (they are published with prerelease=false).
+cask "zen"
+
 # NOT HERE, on purpose: Deskflow, the keyboard/mouse server this Mac runs for the
 # NixOS box. It has no Homebrew package at all — checked, both `deskflow` cask and
 # formula are 404, and so are `synergy` and `input-leap`. Install the .dmg from
