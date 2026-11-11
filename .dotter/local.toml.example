@@ -1,0 +1,22 @@
+# Template for .dotter/local.toml — copy it, edit it, then run `dotter`.
+#
+#   cp .dotter/local.toml.example .dotter/local.toml
+#
+# local.toml itself is gitignored: it holds what THIS machine deploys and the
+# values its templates need, and nothing in it belongs in a public repo.
+#
+# Pick the packages for this machine (they are defined in .dotter/global.toml):
+#   Linux:   ["shared", "linux"]
+#   macOS:   ["shared"]
+#   Windows: ["shared", "windows"]
+packages = ["shared", "linux"]
+
+[variables]
+# Address of the Mac running the Deskflow server, used by linux/waynergy/config.ini.
+# Leave it empty on a machine that does not share input: every other dotfile still
+# deploys, and only waynergy sits there retrying.
+deskflow_server = ""
+
+# Windows only — uncomment to turn on the autocrlf block in shared/gitconfig.
+# Selecting the "windows" package already sets this, so it is normally not needed.
+# is_windows = true

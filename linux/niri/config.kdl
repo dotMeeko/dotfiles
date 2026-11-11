@@ -1,0 +1,208 @@
+input {
+    keyboard {
+        xkb {
+            layout "us,ru"
+            // Layout switching is done by the niri bind Mod+Space (see binds
+            // below), NOT by an xkb `grp:*_toggle` option. That choice is the
+            // result of hitting both failure modes in turn:
+            //
+            //   both at once  -> the key gets handled TWICE. niri runs its bind
+            //                    AND still feeds the key to the xkb state machine,
+            //                    so the layout flipped and flipped back and looked
+            //                    completely dead. This is what DMS caused by
+            //                    setting win_space_toggle behind our back.
+            //   xkb option only -> the layout switches, but nothing CONSUMES the
+            //                    keypress, so Space also reaches the focused window
+            //                    and types a space on every switch.
+            //   niri bind only -> correct: one switch, and the bind swallows the key.
+            //
+            // The old warning here claimed a niri bind cannot do this because
+            // Mod+Space stops matching once a non-Latin layout is active. Tested
+            // directly, in both directions: switching away from Russian works. That
+            // concern is real for LETTER binds, whose keysym changes with the
+            // layout, and simply does not apply to Space.
+            //
+            // Empty on purpose — anything here would fight the bind.
+            options ""
+            model ""
+            rules ""
+            variant ""
+        }
+        repeat-delay 600
+        repeat-rate 25
+        track-layout "global"
+    }
+    touchpad {
+        tap
+        natural-scroll
+    }
+}
+// Monitors. DMS used to own this through its per-monitor-set profiles; Noctalia
+// does not manage outputs at all, so it lives here now.
+//
+// Mode and scale only — NO `position`, and that omission is the point. DMS wrote
+// positions (DP-3 at x=3072, its slot right of the 4K) and kept applying that
+// profile even while the 4K was unplugged, leaving a 3072 px phantom gap in the
+// layout. waynergy measures the screen as the bounding box FROM ZERO, so it then
+// reported 4992 px wide for a 1920 px panel and the remote mouse crawled at
+// 1920/4992 of its proper speed. niri's own left-to-right auto-placement never
+// leaves a gap, whichever monitors happen to be connected, so the whole failure
+// mode is designed out rather than worked around.
+//
+// The cost of dropping positions: with both monitors on, their left-to-right
+// order is whatever niri discovers. Fix it live with `niri msg output ...` if it
+// ever comes out wrong — do NOT pin positions back here.
+output "DP-3" {
+    mode "1920x1080@120.000"
+    scale 1
+}
+
+output "DP-2" {
+    mode "3840x2160@59.997"
+    // 4K at 1:1 is unusably small; this matches what DMS used to apply.
+    scale 1.25
+}
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+layout {
+    gaps 16
+    struts {
+        left 0
+        right 0
+        top 0
+        bottom 0
+    }
+    focus-ring { width 4; }
+    border { off; }
+    default-column-width
+    center-focused-column "never"
+}
+cursor {
+    xcursor-theme "Adwaita"
+    xcursor-size 24
+}
+binds {
+    // Shell controls — Noctalia. Panel ids come from its IPC docs: launcher,
+    // session, clipboard, wallpaper, control-center (plus plugin panels).
+    //
+    // The launcher stays on Alt+Space, where DMS had it, so Mod+Space remains
+    // free for the xkb layout toggle (see the keyboard block above). Putting the
+    // launcher on Mod+Space — as Noctalia's own docs suggest — would collide with
+    // that toggle and fire both on one press, which is exactly the double-handling
+    // bug that made layout switching look broken.
+    Mod+Space hotkey-overlay-title="Switch Keyboard Layout" { switch-layout "next"; }
+    Alt+Space hotkey-overlay-title="Toggle Application Launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    Mod+V hotkey-overlay-title="Toggle Clipboard History" { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
+    Mod+X hotkey-overlay-title="Toggle Session Menu" { spawn "noctalia" "msg" "panel-toggle" "session"; }
+    Mod+Comma hotkey-overlay-title="Toggle Settings" { spawn "noctalia" "msg" "settings-toggle"; }
+    Super+Alt+L hotkey-overlay-title="Lock Screen" { spawn "noctalia" "msg" "session" "lock"; }
+    Mod+Alt+N allow-when-locked=true hotkey-overlay-title="Toggle Night Light" { spawn "noctalia" "msg" "nightlight-force-toggle"; }
+
+    // Mod+N kept from the DMS layout, where it opened the notification centre.
+    // Noctalia has no notifications panel of its own — asked the running shell and
+    // it listed exactly: clipboard, control-center, launcher, polkit, session,
+    // setup-wizard, test, tray-drawer, wallpaper. Notifications live inside the
+    // control centre, so that is what this opens.
+    //
+    // No context argument on purpose: unknown contexts are swallowed silently
+    // (`panel-toggle control-center zzz` answers "ok" and just toggles the panel),
+    // so passing a guessed tab name would look deliberate while doing nothing.
+    Mod+N hotkey-overlay-title="Toggle Control Center" { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
+
+    // Dropped with DMS, no Noctalia equivalent: Mod+M (process list) and
+    // Mod+P (notepad — Noctalia has notes only as a plugin, not installed here).
+
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-up" "3"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-down" "3"; }
+    XF86AudioMute allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "noctalia" "msg" "mic-mute"; }
+    // No step argument on purpose: the signature is `brightness-up [target] [step]`,
+    // so a lone number would be read as the TARGET monitor, not the step.
+    XF86MonBrightnessUp allow-when-locked=true { spawn "noctalia" "msg" "brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "noctalia" "msg" "brightness-down"; }
+    XF86TouchpadToggle allow-when-locked=true repeat=false { spawn "niri" "msg" "action" "toggle-touchpad"; }
+
+    // ─── Окна и приложения ───────────────────────────────────────────────
+    Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "ghostty"; }
+    Mod+Q hotkey-overlay-title="Close Window" { close-window; }
+    Mod+Shift+Slash hotkey-overlay-title="Show Hotkey Overlay" { show-hotkey-overlay; }
+    Mod+Shift+E hotkey-overlay-title="Quit niri" { quit; }
+
+    // ─── Фокус ───────────────────────────────────────────────────────────
+    // niri колоночный: H/L ходят между колонками, J/K — между окнами внутри колонки.
+    Mod+H { focus-column-left; }
+    Mod+L { focus-column-right; }
+    Mod+J { focus-window-down; }
+    Mod+K { focus-window-up; }
+    Mod+Left  { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Home { focus-column-first; }
+    Mod+End  { focus-column-last; }
+
+    // ─── Перемещение ─────────────────────────────────────────────────────
+    Mod+Shift+H { move-column-left; }
+    Mod+Shift+L { move-column-right; }
+    Mod+Shift+J { move-window-down; }
+    Mod+Shift+K { move-window-up; }
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+Down  { move-window-down; }
+    Mod+Shift+Up    { move-window-up; }
+
+    // ─── Размеры и структура колонок ─────────────────────────────────────
+    Mod+R hotkey-overlay-title="Cycle Column Width" { switch-preset-column-width; }
+    Mod+F hotkey-overlay-title="Maximize Column" { maximize-column; }
+    Mod+Shift+F hotkey-overlay-title="Fullscreen" { fullscreen-window; }
+    Mod+C hotkey-overlay-title="Center Column" { center-column; }
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+BracketLeft  hotkey-overlay-title="Consume/Expel Left" { consume-or-expel-window-left; }
+    Mod+BracketRight hotkey-overlay-title="Consume/Expel Right" { consume-or-expel-window-right; }
+
+    // ─── Воркспейсы ──────────────────────────────────────────────────────
+    Mod+U { focus-workspace-down; }
+    Mod+I { focus-workspace-up; }
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+
+    // ─── Мониторы (DP-2 + DP-3) ──────────────────────────────────────────
+    Mod+Ctrl+H { focus-monitor-left; }
+    Mod+Ctrl+L { focus-monitor-right; }
+    Mod+Ctrl+Shift+H { move-column-to-monitor-left; }
+    Mod+Ctrl+Shift+L { move-column-to-monitor-right; }
+
+    // ─── Floating и оверврю ──────────────────────────────────────────────
+    Mod+Shift+Space hotkey-overlay-title="Toggle Floating" { toggle-window-floating; }
+    Mod+Ctrl+Space hotkey-overlay-title="Floating/Tiling Focus" { switch-focus-between-floating-and-tiling; }
+    Mod+O hotkey-overlay-title="Toggle Overview" { toggle-overview; }
+
+    // ─── Скриншоты ───────────────────────────────────────────────────────
+    Print { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+}
+spawn-at-startup "noctalia"
+// Noctalia needs this to let notification actions and window activation work:
+// it activates windows with a serial the compositor considers stale, and without
+// the flag niri refuses the request.
+debug {
+    honor-xdg-activation-with-invalid-serial
+}

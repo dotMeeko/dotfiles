@@ -1,5 +1,5 @@
 {
-  description = "Meeko cross-platform dotfiles — NixOS systems (Nix installs packages; chezmoi owns configs)";
+  description = "Meeko cross-platform dotfiles — NixOS systems (Nix installs packages; dotter owns configs)";
 
   inputs = {
     # Stable base for the system.
@@ -16,18 +16,23 @@
     };
     # Niri compositor via niri-flake (nixos session + home-manager config/lib).
     niri.url = "github:sodiboo/niri-flake";
-    # DankMaterialShell — Quickshell desktop shell over Niri (preconfigured).
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
+    # Noctalia Greeter — greetd login screen for the Noctalia shell.
+    #
+    # From the upstream flake, not nixpkgs: the pinned nixos-26.05 has no
+    # noctalia-greeter module at all (checked — display-managers/ there ships
+    # dms-greeter, gdm, sddm and friends, but not this one). Their module also
+    # already carries the fix for the NixOS session-discovery bug, prefixing the
+    # greetd command with XDG_DATA_DIRS, and it disables the nixpkgs copy of
+    # itself so the two can never both apply.
+    #
+    # The shell itself needs no module — it is one binary plus its own TOML, and
+    # comes from pkgs.unstable (see home/packages.nix) because nixpkgs-26.05 is
+    # four minor versions behind.
+    noctalia-greeter = {
+      url = "github:noctalia-dev/noctalia-greeter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # DankGreeter — greetd login screen in the DMS style (Material 3, theme-synced).
-    # The `services.displayManager.dms-greeter` module lives in THIS flake, not nixpkgs.
-    dank-greeter = {
-      url = "github:AvengeMedia/dank-greeter";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    # Zen browser — not in nixpkgs; community flake. Package only (chezmoi owns configs).
+    # Zen browser — not in nixpkgs; community flake. Package only (dotter owns configs).
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {

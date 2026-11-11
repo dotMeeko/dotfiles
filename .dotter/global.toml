@@ -1,0 +1,74 @@
+# dotter — what goes where. This replaces chezmoi, whose source layout had to
+# encode every target path in the FILENAME (home/dot_config/...), which is not
+# configurable: upstream closed that request as wontfix. Here the repo layout is
+# ours and the mapping is written out instead. That is the whole trade — ugly
+# filenames for an explicit mapping file.
+#
+# Packages are named groups, nothing more. Each machine picks its own in
+# .dotter/local.toml, which replaces chezmoi's templated .chezmoiignore and is
+# more direct: there is no OS detection to get wrong, the machine states what it
+# wants.
+#
+# Entries are SYMLINKS into this repo by default, so editing a file here takes
+# effect immediately with no deploy step. `type = "template"` generates a real
+# file instead, which is required wherever a value must not be committed.
+
+[shared.files]
+"shared/bashrc" = "~/.bashrc"
+"shared/nvim/init.lua" = "~/.config/nvim/init.lua"
+# Template because the Windows-only autocrlf block is gated on a variable.
+"shared/gitconfig" = { target = "~/.gitconfig", type = "template" }
+
+[linux.files]
+"linux/niri/config.kdl" = "~/.config/niri/config.kdl"
+# Template: carries the Deskflow server address from local.toml, which is
+# gitignored, so the address never lands in this public repo.
+"linux/waynergy/config.ini" = { target = "~/.config/waynergy/config.ini", type = "template" }
+# waynergy merges config.ini with every *.ini in config.ini.d/ (src/config.c:246);
+# this is the Apple keycode table the uinput backend cannot work without.
+"linux/waynergy/raw-keymap.ini" = "~/.config/waynergy/config.ini.d/raw-keymap.ini"
+"linux/systemd/waynergy.service" = "~/.config/systemd/user/waynergy.service"
+# The second target is the systemd ENABLEMENT symlink — the one `systemctl --user
+# enable` would create out of WantedBy=graphical-session.target. Declaring it here
+# means a fresh machine needs no manual enable step. Its source inside the repo is
+# itself a symlink to ../waynergy.service, which dotter resolves, so the unit
+# still exists exactly once.
+"linux/systemd/graphical-session.target.wants/waynergy.service" = "~/.config/systemd/user/graphical-session.target.wants/waynergy.service"
+# Noctalia's settings. Three things about this entry are not obvious:
+#
+# 1. The path is under .local/state, not .config. The docs say the config lives in
+#    ~/.config/noctalia/config.toml, but 5.3.0 leaves that directory empty and
+#    keeps everything the settings UI writes here instead.
+# 2. Only this ONE file is mapped. The same directory holds genuine runtime state
+#    that must never be committed — state.toml, usage_counts.json,
+#    recently_used.json, notification_history.json and clipboard/index.enc, which
+#    is clipboard history in a public repo's worth of trouble.
+# 3. Symlink, so the settings UI writes straight into the repo and tuning is
+#    tracked as it happens. Verified that Noctalia's own writes keep the symlink
+#    rather than replacing it with a plain file.
+#
+# Two things in the file DO rot, and knowingly: wallpaper.path is a /nix/store
+# path that changes with every noctalia version bump, and the lockscreen widget
+# keys are per-connector ("...@DP-3"). Neither breaks anything here; both would
+# need fixing up by hand on a machine with different monitors.
+"linux/noctalia/settings.toml" = "~/.local/state/noctalia/settings.toml"
+
+"linux/bin/waynergy-toggle" = "~/.local/bin/waynergy-toggle"
+"linux/applications/waynergy-toggle.desktop" = "~/.local/share/applications/waynergy-toggle.desktop"
+
+[windows.files]
+# Template rather than symlink on purpose: Windows only allows symlinks with
+# Developer Mode on or from an elevated shell, and a login profile is not worth
+# that dependency.
+"windows/PowerShell/Microsoft.PowerShell_profile.ps1" = { target = "~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1", type = "template" }
+
+[windows.variables]
+# Read by shared/gitconfig. Defined only in this package, so selecting "windows"
+# is exactly what switches the autocrlf block on.
+is_windows = true
+
+# Where the repo is cloned on Windows, relative to the user profile — the
+# PowerShell profile's `dot` helper has to cd there before running dotter.
+# Linux and macOS use ~/.dotfiles; Windows has always used ~/dots here, and
+# hardcoding the Linux path into that profile was simply wrong.
+dotfiles_repo = "dots"

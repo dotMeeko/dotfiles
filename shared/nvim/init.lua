@@ -1,4 +1,4 @@
--- init.lua — portable Neovim config, managed by chezmoi. No Nix or plugins required.
+-- init.lua — portable Neovim config, managed by dotter. No Nix or plugins required.
 -- Sensible defaults that work on any distro.
 
 vim.g.mapleader = " "

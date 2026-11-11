@@ -16,7 +16,7 @@ PartOf=graphical-session.target
 [Service]
 Type=simple
 # Everything (host, screen name, backend, TLS, keymap) lives in
-# ~/.config/waynergy/config.ini and config.ini.d/, deployed by chezmoi.
+# ~/.config/waynergy/config.ini and config.ini.d/, deployed by dotter.
 #
 # %u is the systemd specifier for the user running the unit, so the path holds on
 # any username. home-manager runs as a NixOS module here, which puts user packages

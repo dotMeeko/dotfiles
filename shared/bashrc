@@ -1,4 +1,4 @@
-# ~/.bashrc — managed by chezmoi. Portable, works without Nix (any distro).
+# ~/.bashrc — managed by dotter. Portable, works without Nix (any distro).
 # Keep minimal and cross-distro; machine/OS-specific bits go in templates later.
 
 # History
@@ -11,7 +11,9 @@ shopt -s histappend
 alias ll='ls -alh'
 alias la='ls -A'
 alias gs='git status'
-alias ca='chezmoi apply'
+# dotter reads .dotter/global.toml relative to the working directory, so it has
+# to run from the repo root — that is what the subshell is for.
+alias dot='(cd ~/.dotfiles && dotter)'
 
 # Simple prompt
 PS1='\u@\h:\w\$ '

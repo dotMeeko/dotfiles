@@ -1,5 +1,5 @@
 # packages.ps1 — Windows packages, the counterpart of nix/home/packages.nix (NixOS)
-# and macos/Brewfile (macOS). chezmoi still owns every config; this file only installs
+# and macos/Brewfile (macOS). dotter still owns every config; this file only installs
 # software.
 #
 # Run:  pwsh -File windows\packages.ps1
@@ -15,7 +15,7 @@ $packages = @(
     # CLI — same set as the other two OSes
     'Git.Git',
     'Neovim.Neovim',
-    'twpayne.chezmoi',              # owns the dotfiles themselves
+    'SuperCuber.Dotter',            # owns the dotfiles themselves
     'BurntSushi.ripgrep.MSVC',
     'sharkdp.fd',
     'junegunn.fzf',
@@ -43,4 +43,4 @@ foreach ($id in $packages) {
 }
 
 Write-Host ""
-Write-Host "Done. Configs come separately: chezmoi init --apply dotMeeko/dotfiles" -ForegroundColor Green
+Write-Host "Done. Configs come separately: clone the repo, write .dotter\local.toml, run dotter" -ForegroundColor Green

@@ -1,0 +1,6 @@
+# dotter keeps this machine's package selection and variables here, plus its
+# deploy cache. All machine-local, none of it belongs in the repo — and
+# local.toml is what keeps the Deskflow server address out of a public repo.
+.dotter/local.toml
+.dotter/cache.toml
+.dotter/cache/

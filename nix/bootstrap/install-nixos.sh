@@ -185,4 +185,4 @@ nix --experimental-features "nix-command flakes" flake lock "$FLAKE_DIR"
 msg "Installing NixOS (build '$role', machine '$machine')"
 nixos-install --root "$ROOT" --flake "path:$FLAKE_DIR#$role" --no-root-passwd
 
-msg "Done. Reboot, then: chezmoi init --apply dotMeeko/dotfiles"
+msg "Done. Reboot, then from the repo: cp .dotter/local.toml.example .dotter/local.toml, edit it, run dotter"

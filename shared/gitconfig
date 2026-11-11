@@ -1,0 +1,18 @@
+; ~/.gitconfig — deployed by dotter as a template (see .dotter/global.toml).
+;
+; The Windows-only block is gated on `is_windows`, set in that machine's
+; .dotter/local.toml. An undefined variable inside a handlebars if-block is falsy
+; rather than an error, so Linux and macOS need no flag at all — verified, not
+; assumed. Note that handlebars markup cannot appear in these comments either:
+; dotter parses the whole file, comment lines included.
+[user]
+	name = Meeko
+	email = dev.wladimir@gmail.com
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+{{#if is_windows}}
+[core]
+	autocrlf = true
+{{/if}}
