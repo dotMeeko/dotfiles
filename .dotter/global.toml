@@ -15,7 +15,16 @@
 
 [shared.files]
 "shared/bashrc" = "~/.bashrc"
-"shared/nvim/init.lua" = "~/.config/nvim/init.lua"
+# Neovim (LazyVim). Mapped as a DIRECTORY: dotter expands it and symlinks every
+# file inside separately, so ~/.config/nvim is a real directory holding symlinks
+# into the repo. Consequence worth knowing: files Neovim creates there itself are
+# plain local files, NOT tracked — lazyvim.json (which `:LazyExtras` writes) is
+# one of them, which is why extras are declared in lua/config/lazy.lua instead.
+#
+# lazy-lock.json is the exception, and only because it exists in the repo as a
+# source: lazy.nvim rewrites it with writefile(), which truncates through the
+# symlink rather than replacing it, so plugin versions stay pinned in git.
+"shared/nvim" = "~/.config/nvim"
 # Template because the Windows-only autocrlf block is gated on a variable.
 "shared/gitconfig" = { target = "~/.gitconfig", type = "template" }
 

@@ -1,0 +1,8 @@
+-- Options are automatically loaded before lazy.nvim startup
+-- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
+-- Add any additional options here
+--
+-- Deliberately empty. Everything the pre-LazyVim init.lua set by hand — leader,
+-- number/relativenumber, 2-space expandtab, smartcase, termguicolors, scrolloff,
+-- unnamedplus clipboard, undofile, and <Esc> clearing hlsearch — is already a
+-- LazyVim default, so repeating it here would only create two places to edit.

@@ -15,5 +15,13 @@ alias gs='git status'
 # to run from the repo root — that is what the subshell is for.
 alias dot='(cd ~/.dotfiles && dotter)'
 
+# Editor. Guarded on the binary existing so this file stays usable on a machine
+# where Neovim is not installed — the config in ~/.config/nvim is portable, the
+# binary is not something .bashrc can assume.
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR=nvim
+  export VISUAL=nvim
+fi
+
 # Simple prompt
 PS1='\u@\h:\w\$ '

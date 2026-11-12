@@ -6,6 +6,39 @@
     pkgs.git
     pkgs.vim
 
+    # Neovim + what LazyVim needs around it. The config itself lives in
+    # shared/nvim/ and is owned by dotter (no programs.neovim, per Architecture).
+    #
+    # 0.12.4 from stable is enough: LazyVim refuses to start below 0.11.2.
+    pkgs.neovim
+    # nvim-treesitter is on its `main` branch in current LazyVim, which COMPILES
+    # parsers on :TSUpdate instead of shipping them — hence a C compiler and the
+    # tree-sitter CLI. Without these, highlighting silently stays off.
+    pkgs.gcc
+    pkgs.tree-sitter
+    # Pickers and the grep/files sources behind <leader><space> and <leader>sg.
+    pkgs.ripgrep
+    pkgs.fd
+    # <leader>gg opens this.
+    pkgs.lazygit
+
+    # Language servers, formatters and linters. These come from Nix rather than
+    # mason.nvim, which is disabled on NixOS — it downloads FHS binaries that
+    # cannot exec here. See shared/nvim/lua/plugins/nixos.lua for the gate.
+    #
+    # lua-language-server + stylua: LazyVim core (it configures lua_ls itself).
+    pkgs.lua-language-server
+    pkgs.stylua
+    # shfmt: LazyVim core formats shell with it (relevant — shared/bashrc).
+    pkgs.shfmt
+    # nil + nixfmt + statix: the lang.nix extra, imported in config/lazy.lua.
+    # That extra asks for nil_ls, not nixd; the package is `nil`. And nixfmt is
+    # the RFC-style formatter now — nixfmt-rfc-style is an alias for it in 26.05
+    # and warns on evaluation.
+    pkgs.nil
+    pkgs.nixfmt
+    pkgs.statix
+
     # Noctalia — the desktop shell (bar, launcher, notifications, lock screen)
     # that niri starts via spawn-at-startup. From unstable on purpose: 26.05 pins
     # 5.0.1 while upstream is on 5.4.1, and the IPC surface these keybinds use

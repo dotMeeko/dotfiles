@@ -15,7 +15,7 @@ on every OS — configs stay plain and portable (no Nix needed to edit them).
 shared/               dotfiles for every OS
   bashrc              ~/.bashrc
   gitconfig           ~/.gitconfig (template; Windows bits gated on a variable)
-  nvim/init.lua       Neovim config (portable Lua)
+  nvim/              Neovim — LazyVim (whole dir -> ~/.config/nvim; lazy-lock.json pinned)
 linux/                Linux-only dotfiles
   niri/config.kdl     Niri compositor (incl. monitor modes and Noctalia keybinds)
   waynergy/           KVM client config (template) + Apple keycode table
