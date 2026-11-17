@@ -1,7 +1,7 @@
 # Desktop session: Niri (from niri-flake) + a login manager.
-# The niri config itself is deployed by dotter (linux/niri/ in the repo), and the
-# shell on top of it is Noctalia (installed in home/packages.nix);
-# Nix only installs the software here.
+# The niri config itself is deployed by dotter (linux/niri/ in the repo) and the
+# DMS integration lives in home-manager (modules/home.nix); Nix only installs
+# the software here.
 {
   config,
   inputs,
@@ -25,115 +25,38 @@ let
   greeterWaynergyConf = "/var/lib/greetd-waynergy";
   userWaynergyConf = "/home/${config.my.username}/.config/waynergy";
 
-  # greetd's whole session command, replaced wholesale. Three jobs, each
-  # load-bearing:
+  # No restart loop around waynergy, on purpose. It already retries the
+  # connection itself ("trying to reconnect in a second") when the Mac is asleep
+  # or Deskflow is not up yet, which is the only failure worth surviving here. A
+  # loop could outlive the greeter session and then fight the user's own instance
+  # over the screen name, which the server answers with EBSY.
   #
-  # 1. XDG_DATA_DIRS. Without it the greeter offers no sessions to log into at
-  #    all: NixOS keeps session .desktop files in a generated aggregate that is
-  #    not part of the system profile, so the greeter cannot find them the usual
-  #    way (nixpkgs#582861). Upstream's module sets this in the command it
-  #    builds — overriding that command means repeating it here.
-  #
-  # 2. waynergy, so the Mac's keyboard can type the password. This cannot reuse
-  #    the dms-greeter trick of an include in the greeter's compositor config:
-  #    noctalia-greeter runs its OWN wlroots compositor and ignores whatever
-  #    command follows `--` (verified — it always maps its own greeter surface),
-  #    so there is no hook to use. Instead we wait for that compositor's Wayland
-  #    socket and attach to it.
-  #
-  #    That waynergy works against that compositor at all was verified before
-  #    committing to this design, not assumed: with WAYLAND_DISPLAY pointed at a
-  #    headless instance of it, waynergy 0.0.17 logged "Geometry updated:
-  #    1280x720" and "Using uinput".
-  #
-  # 3. Lifetime. When the greeter session ends, waynergy goes with it; a leftover
-  #    instance would fight the user's own over the screen name, which the server
-  #    answers with EBSY.
-  #
-  # -n disables clipboard sync: wl-copy needs the data-control protocol, which
-  # this compositor does not offer (it fails loudly in the log), and pulling the
-  # Mac's clipboard into a login screen is pointless anyway.
-  greeterSessionCommand = pkgs.writeShellScript "noctalia-greeter-session-with-waynergy" ''
-    set -u
-
-    # Greeter and compositor logs. Their session script parks stdout/stderr on
-    # /dev/null by default so wlroots does not paint over the VT, which means a
-    # failing greeter leaves NOTHING in the journal — that is how the first
-    # version of this script failed invisibly. A file keeps the logs without
-    # touching the VT; /var/lib/noctalia-greeter is created greeter-owned by the
-    # module's tmpfiles rules.
-    export NOCTALIA_GREETER_LOG=/var/lib/noctalia-greeter/session.log
-
-    ${pkgs.coreutils}/bin/env \
-      XDG_DATA_DIRS="${config.services.displayManager.sessionData.desktops}/share" \
-      ${config.services.displayManager.noctalia-greeter.package}/bin/noctalia-greeter-session -- &
-    session=$!
-
-    # Where the compositor's Wayland socket actually turns up.
-    #
-    # NOT $XDG_RUNTIME_DIR, and this is the whole bug of the first attempt:
-    # noctalia-greeter-session OVERWRITES that variable with
-    # /tmp/noctalia-runtime-$(id -u) before starting the compositor, and does not
-    # use PAM's. On this machine PAM does not even create /run/user/999, so the
-    # original loop watched a directory that never existed, found nothing for ten
-    # seconds and gave up without a word.
-    #
-    # PAM's dir is still checked second, in case upstream ever goes back to it.
-    waynergy_runtime="/tmp/noctalia-runtime-$(${pkgs.coreutils}/bin/id -u)"
-
-    # Deliberately NOT `exec`, and every socket is tried on every pass. A socket
-    # file existing says nothing about anything listening on it: /tmp survives
-    # reboots on this machine (cleanOnBoot is off and /tmp is not a tmpfs), so a
-    # dead wayland-0 from the previous boot sits there, wlroots skips it because
-    # its lock is stale and listens on wayland-1 instead — and a loop that globbed
-    # in alphabetical order and exec'd once grabbed the corpse and died with
-    # "Could not connect to display". Falling through on failure makes the next
-    # candidate, and the next pass, fix it by themselves.
-    (
-      attempt=0
-      while [ "$attempt" -lt 60 ]; do
-        attempt=$((attempt + 1))
-        for sock in "$waynergy_runtime"/wayland-* "''${XDG_RUNTIME_DIR:-/nonexistent}"/wayland-*; do
-          case "$sock" in *.lock | *'*') continue ;; esac
-          [ -S "$sock" ] || continue
-          # systemd-cat so this lands in the journal under a name worth grepping:
-          # journalctl -b -t greeter-waynergy
-          XDG_RUNTIME_DIR="''${sock%/*}" \
-          WAYLAND_DISPLAY="''${sock##*/}" \
-          WAYNERGY_CONF_PATH=${greeterWaynergyConf} \
-            ${pkgs.systemd}/bin/systemd-cat -t greeter-waynergy \
-              ${pkgs.waynergy}/bin/waynergy -n
-          # Returned, so either that socket was dead or the greeter just ended.
-          # Either way: rescan.
-        done
-        ${pkgs.coreutils}/bin/sleep 1
-      done
-      echo "greeter-waynergy: no usable Wayland socket after 60 attempts" \
-        | ${pkgs.systemd}/bin/systemd-cat -t greeter-waynergy -p warning
-    ) &
-    waynergy=$!
-
-    wait "$session"
-    kill "$waynergy" 2>/dev/null || :
+  # -n disables clipboard sync: wl-copy is not in the greeter's PATH, and pulling
+  # the Mac's clipboard into a login screen is pointless at best.
+  greeterWaynergy = pkgs.writeShellScript "waynergy-greeter" ''
+    export WAYNERGY_CONF_PATH=${greeterWaynergyConf}
+    exec ${pkgs.waynergy}/bin/waynergy -n
   '';
-
 in
 {
-  # Noctalia Greeter module is shipped by its own flake — see nix/flake.nix for
-  # why it cannot come from the pinned nixpkgs.
-  imports = [ inputs.noctalia-greeter.nixosModules.default ];
+  # Dux Greeter module comes from its own flake — the shell flake's
+  # `nixosModules.greeter` is now a stub that only points here. Options still
+  # live under programs.dms-greeter, not services.displayManager.*.
+  imports = [ inputs.dux-greeter.nixosModules.default ];
 
   # Niri compositor, enabled system-wide for the session / greetd.
   programs.niri.enable = true;
 
   # Use nixpkgs' niri (26.04) instead of niri-flake's niri-stable (25.08).
   #
-  # The original reason was DankMaterialShell writing `include` lines into
-  # config.kdl, which 25.08 cannot parse at all ("unexpected node `include`") —
-  # that took the whole session down. Noctalia never touches the niri config, so
-  # that particular trap is gone, but the version override stays: the config here
-  # uses `debug { honor-xdg-activation-with-invalid-serial }`, which Noctalia needs
-  # for notification actions and which was checked against 26.04.
+  # The `include` directive landed in niri 25.11 and `optional=true` in 26.04.
+  # This config grants DMS no includes at all (see linux/niri/config.kdl), but
+  # the shell can still append one by itself the first time its settings UI
+  # touches something it wants to own — and on 25.08 a single `include` line
+  # makes the WHOLE config fail to parse, which kills the session and bounces
+  # you back to a grey login screen. Verified both ways: 26.04 accepts the file,
+  # 25.08 rejects it with "unexpected node `include`". Keeping 26.04 turns that
+  # from a dead session into a diff in the repo.
   #
   # Note it does NOT fix compositor keybinds from virtual-keyboard input — that
   # fix merged upstream 2026-10-13, after 26.04, which is why keyboard sharing
@@ -143,66 +66,18 @@ in
   # GPU / graphics stack (needed by any Wayland compositor).
   hardware.graphics.enable = true;
 
-  # Log in through Noctalia Greeter — greetd-based, and it brings its own small
-  # wlroots compositor rather than running niri like dms-greeter did.
-  services.displayManager.noctalia-greeter = {
+  # Log in through Dux Greeter — greetd-based, DMS-styled. The module enables
+  # greetd itself and launches the greeter inside a Niri session, which is what
+  # makes the niri_overrides.kdl hook below possible at all.
+  #
+  # configHome makes it copy the user's DMS theme/wallpaper. The module turns
+  # that into a configFiles list covering both the old DankMaterialShell paths
+  # and the current ~/.config/dms ones, so the rename needs nothing from us.
+  programs.dms-greeter = {
     enable = true;
-
-    # Module from their flake, package from unstable. The flake's own package
-    # would be built from source here, while unstable ships 1.7.0 prebuilt in the
-    # binary cache; the module only wires greetd, tmpfiles and polkit, so it does
-    # not care which build it points at.
-    package = pkgs.unstable.noctalia-greeter;
-
-    # Lets the session push its theme to the login screen without an
-    # authentication prompt — the rough equivalent of dms-greeter's configHome.
-    passwordless-sync-users = [ config.my.username ];
-
-    settings = {
-      # Match the cursor the session uses (see the cursor block in the niri config).
-      cursor = {
-        theme = "Adwaita";
-        size = 24;
-      };
-
-      # Same layouts as the session, but deliberately NOT the same toggle.
-      # us first so the prompt always starts on Latin — a login screen is the
-      # worst place to be stuck in an invisible layout group — and Alt+Shift
-      # rather than Super+Space because the greeter shows no layout indicator,
-      # so the switch should be one you press on purpose. Over Deskflow this
-      # arrives as Control+Shift, since the waynergy raw-keymap maps the Mac's
-      # Control onto Alt.
-      keyboard = {
-        layout = "us,ru";
-        options = "grp:alt_shift_toggle";
-      };
-
-      # Display settings for the login screen. This is what replaces the niri
-      # `output` block the dms-greeter setup used: noctalia-greeter's own
-      # compositor reads these from greeter.toml instead.
-      output = {
-        # Per-output form because the two monitors differ: DP-3 is a 120 Hz
-        # panel while the 4K DP-2 is 60 Hz. Nominal values match fractional
-        # modes within 1 Hz, so 60 picks up DP-2's actual 59.997.
-        refresh_rate = "DP-3:120; DP-2:60";
-
-        # Same scales as the session — at 1:1 the prompt is unreadable on 4K.
-        scales = "DP-3:1; DP-2:1.25";
-
-        # No `name` on purpose: pinning the greeter to one connector hides it on
-        # the other monitor, while omitting it mirrors the prompt on every
-        # output. No `width`/`height` either — that pair is global, and these two
-        # panels have different resolutions, so a single size would be wrong for
-        # one of them. Each output keeps its own preferred mode and only the
-        # refresh rate is forced.
-      };
-    };
+    compositor.name = "niri";
+    configHome = "/home/${config.my.username}";
   };
-
-  # The command the module builds is replaced here, because the remote keyboard
-  # has to be started inside the greeter session — see greeterSessionCommand
-  # above for the three things that script has to do.
-  services.greetd.settings.default_session.command = lib.mkForce "${greeterSessionCommand}";
 
   # Kernel-level virtual input, for waynergy's uinput backend — how this machine
   # receives the Mac's keyboard and mouse (server there is Deskflow).
@@ -226,21 +101,55 @@ in
 
   # ── Keyboard and mouse BEFORE login ───────────────────────────────────────
   #
-  # The same waynergy+uinput path as the session, but running inside the greeter
-  # session — see greeterSessionCommand above for how it gets in there. Not a
-  # shortcut either: input on a Wayland login screen CANNOT go through the
-  # RemoteDesktop portal, because the portal needs a user session and a human to
-  # approve the capture, and a greeter has neither. Symless documents the
-  # consequence for their own product — Synergy 3's "Run on the login screen" is
-  # greyed out on Linux, and Synergy 1's pre-login mode needs X11 plus GDM.
-  # Kernel-level injection is the only thing that works here, which is also why
-  # this cannot be swapped for a portal client later.
+  # The same waynergy+uinput path as the session, but running inside the
+  # greeter's own niri. Not a shortcut either: input on a Wayland login screen
+  # CANNOT go through the RemoteDesktop portal, because the portal needs a user
+  # session and a human to approve the capture, and a greeter has neither.
+  # Symless documents the consequence for their own product — Synergy 3's "Run
+  # on the login screen" is greyed out on Linux, and Synergy 1's pre-login mode
+  # needs X11 plus GDM. Kernel-level injection is the only thing that works
+  # here, which is also why this cannot be swapped for a portal client later.
+
+  # dms-greeter appends `include "/etc/greetd/niri_overrides.kdl"` to the niri
+  # config it generates for the greeter, but only when that file exists
+  # (core/internal/launcher/compositor.go — checked in dux-greeter 2.1.0, where
+  # the hook survived the rename). Using its own hook beats copying the embedded
+  # config just to add one line: the greeter keeps following upstream when the
+  # flake updates.
   #
-  # LOST in the move from dms-greeter, and worth knowing: the login screen's
-  # refresh rate is no longer ours to set. dms-greeter ran niri, so an `output`
-  # block could pin DP-3 to 120 Hz; noctalia-greeter runs its own compositor and
-  # takes its display settings from greeter.toml instead. Its settings do have an
-  # `output` section — mapping that out is a separate job.
+  # This hook is also why the greeter can set its own refresh rate here, which a
+  # greeter running its own non-niri compositor cannot.
+  environment.etc."greetd/niri_overrides.kdl".text = ''
+    spawn-at-startup "${greeterWaynergy}"
+
+    // Refresh rate at the login screen. Without this niri takes the mode the
+    // display calls preferred in its EDID, which on DP-3 is 60 Hz even though the
+    // panel does 120 — the greeter would run at half the session's rate.
+    //
+    // Deliberately NO `position` here, and the session agrees (see the output
+    // blocks in linux/niri/config.kdl). Pinning positions is what put a lone
+    // connected monitor at its dual-layout slot — DP-3 at x=3072, right of the
+    // 4K — leaving a 3072 px phantom gap. That gap is what made the remote mouse
+    // crawl: waynergy measures the screen as the bounding box FROM ZERO, so it
+    // reported 4992 px wide for a 1920 px screen. niri's own left-to-right
+    // auto-placement never leaves gaps, which is exactly what a greeter wants.
+    //
+    // Blocks for outputs that are not connected are ignored, so both can be
+    // listed unconditionally and a monitor can be plugged in or left off freely.
+    output "DP-3" {
+        mode "1920x1080@120.000"
+    }
+
+    output "DP-2" {
+        // Matches the session (linux/niri/config.kdl). 59.997 stood here until
+        // 2026-11-17 and was wrong for the same reason it was wrong there: it is
+        // only the panel's `preferred` mode, while the thing actually does 144.
+        mode "3840x2160@143.963"
+        // 4K at 1:1 would render the login prompt unreadably small. Matches the
+        // scale the session uses for this monitor.
+        scale 1.25
+    }
+  '';
 
   # /dev/uinput is 0660 root:uinput (hardware.uinput above creates the group and
   # the udev rule), so the greeter has to be in that group as well — the login
@@ -255,20 +164,12 @@ in
   # waynergy merges config.ini with every file in config.ini.d/ (src/config.c)
   # and that is where the Apple keycode table lives.
   #
-  # Guarded with `|| :` as a whole, exactly like the dms-greeter lines above it:
-  # NixOS runs preStart under `set -e`, so an unguarded failure here would stop
-  # greetd from starting at all — a black screen instead of a login prompt.
-  # Remote input is a convenience and must never be able to take the greeter down
-  # with it.
+  # Guarded with `|| :` as a whole: NixOS runs preStart under `set -e`, so an
+  # unguarded failure here would stop greetd from starting at all — a black
+  # screen instead of a login prompt. Remote input is a convenience and must
+  # never be able to take the greeter down with it.
   systemd.services.greetd.preStart = lib.mkAfter ''
     {
-      # The greeter's compositor puts its Wayland socket in
-      # /tmp/noctalia-runtime-<uid> (its session script forces XDG_RUNTIME_DIR
-      # there), and /tmp is neither a tmpfs nor cleaned on boot here — so last
-      # boot's dead socket and its stale lock are still sitting in it. Clearing it
-      # as root means every greetd start gets exactly one, live socket.
-      ${pkgs.coreutils}/bin/rm -rf "/tmp/noctalia-runtime-$(${pkgs.coreutils}/bin/id -u ${greeterUser})"
-
       ${pkgs.coreutils}/bin/rm -rf ${greeterWaynergyConf}
       ${pkgs.coreutils}/bin/install -d -m 0750 -o ${greeterUser} -g ${greeterGroup} ${greeterWaynergyConf}
       if [ -d ${userWaynergyConf} ]; then

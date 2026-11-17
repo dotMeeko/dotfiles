@@ -37,8 +37,10 @@ input {
         natural-scroll
     }
 }
-// Monitors. DMS used to own this through its per-monitor-set profiles; Noctalia
-// does not manage outputs at all, so it lives here now.
+// Monitors, owned HERE and nowhere else. DMS used to own them through its
+// per-monitor-set profiles, and it stays locked out of them on purpose: no
+// `dms/outputs.kdl` include at the bottom of this file, and its auto-apply left
+// off (both explained there).
 //
 // Mode and scale only — NO `position`, and that omission is the point. DMS wrote
 // positions (DP-3 at x=3072, its slot right of the 4K) and kept applying that
@@ -49,6 +51,13 @@ input {
 // leaves a gap, whichever monitors happen to be connected, so the whole failure
 // mode is designed out rather than worked around.
 //
+// Worth knowing for the scale 1.25 below: DMS computed neighbour offsets with
+// floor() on the logical width while niri uses ceil(), so a fractionally scaled
+// monitor overlapped its neighbour by 1 px and niri — which auto-places
+// overlapping outputs elsewhere — threw the layout across the desk. Fixed
+// upstream (dux-shell#3875, "ceil logical output sizes on niri"), and with no
+// positions here it cannot bite anyway. Two independent reasons, not one.
+//
 // The cost of dropping positions: with both monitors on, their left-to-right
 // order is whatever niri discovers. Fix it live with `niri msg output ...` if it
 // ever comes out wrong — do NOT pin positions back here.
@@ -58,8 +67,19 @@ output "DP-3" {
 }
 
 output "DP-2" {
-    mode "3840x2160@59.997"
-    // 4K at 1:1 is unusably small; this matches what DMS used to apply.
+    // 143.963, not the 59.997 this said until 2026-11-17, and not an EDID
+    // reading either: 59.997 is merely the mode the panel calls `preferred`,
+    // which is what niri falls back to and what DMS pinned. The 144 Hz mode was
+    // being set at RUNTIME — by the niri-displays plugin, whose changes go
+    // through `niri msg output` and which niri deliberately never writes back
+    // to config.kdl. So the repo quietly said 60 while the desk ran 144, and
+    // the next session restart would have "fixed" it down to 60.
+    //
+    // Caught by linux/bin/niri-outputs-snapshot, which exists for exactly this
+    // class of drift. Run it after any display fiddling.
+    mode "3840x2160@143.963"
+    // 4K at 1:1 is unusably small. 3840/1.25 = 3072 logical px, which is what
+    // niri reports, so this one was in sync.
     scale 1.25
 }
 
@@ -82,44 +102,40 @@ cursor {
     xcursor-size 24
 }
 binds {
-    // Shell controls — Noctalia. Panel ids come from its IPC docs: launcher,
-    // session, clipboard, wallpaper, control-center (plus plugin panels).
+    // Shell controls — DMS (Dux Modular Shell), driven over `dms ipc`. Written
+    // out by hand here rather than taken from the shell's home-manager module:
+    // that module adds them to programs.niri.settings, and this file is the one
+    // that actually reaches disk (niri-flake's output is force-disabled — see
+    // nix/modules/home.nix for the full reason).
     //
-    // The launcher stays on Alt+Space, where DMS had it, so Mod+Space remains
-    // free for the xkb layout toggle (see the keyboard block above). Putting the
-    // launcher on Mod+Space — as Noctalia's own docs suggest — would collide with
-    // that toggle and fire both on one press, which is exactly the double-handling
-    // bug that made layout switching look broken.
+    // The launcher stays on Alt+Space, NOT the Mod+Space the module would set.
+    // Mod+Space is the keyboard-layout toggle (see the keyboard block above);
+    // binding the launcher onto the same key fires both on one press, which is
+    // exactly the double-handling bug that made layout switching look broken.
     Mod+Space hotkey-overlay-title="Switch Keyboard Layout" { switch-layout "next"; }
-    Alt+Space hotkey-overlay-title="Toggle Application Launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
-    Mod+V hotkey-overlay-title="Toggle Clipboard History" { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
-    Mod+X hotkey-overlay-title="Toggle Session Menu" { spawn "noctalia" "msg" "panel-toggle" "session"; }
-    Mod+Comma hotkey-overlay-title="Toggle Settings" { spawn "noctalia" "msg" "settings-toggle"; }
-    Super+Alt+L hotkey-overlay-title="Lock Screen" { spawn "noctalia" "msg" "session" "lock"; }
-    Mod+Alt+N allow-when-locked=true hotkey-overlay-title="Toggle Night Light" { spawn "noctalia" "msg" "nightlight-force-toggle"; }
+    Alt+Space hotkey-overlay-title="Toggle Application Launcher" { spawn "dms" "ipc" "spotlight" "toggle"; }
+    Mod+V hotkey-overlay-title="Toggle Clipboard Manager" { spawn "dms" "ipc" "clipboard" "toggle"; }
+    Mod+X hotkey-overlay-title="Toggle Power Menu" { spawn "dms" "ipc" "powermenu" "toggle"; }
+    Mod+Comma hotkey-overlay-title="Toggle Settings" { spawn "dms" "ipc" "settings" "toggle"; }
+    Mod+N hotkey-overlay-title="Toggle Notification Center" { spawn "dms" "ipc" "notifications" "toggle"; }
+    Super+Alt+L hotkey-overlay-title="Toggle Lock Screen" { spawn "dms" "ipc" "lock" "lock"; }
+    Mod+Alt+N allow-when-locked=true hotkey-overlay-title="Toggle Night Mode" { spawn "dms" "ipc" "night" "toggle"; }
 
-    // Mod+N kept from the DMS layout, where it opened the notification centre.
-    // Noctalia has no notifications panel of its own — asked the running shell and
-    // it listed exactly: clipboard, control-center, launcher, polkit, session,
-    // setup-wizard, test, tray-drawer, wallpaper. Notifications live inside the
-    // control centre, so that is what this opens.
-    //
-    // No context argument on purpose: unknown contexts are swallowed silently
-    // (`panel-toggle control-center zzz` answers "ok" and just toggles the panel),
-    // so passing a guessed tab name would look deliberate while doing nothing.
-    Mod+N hotkey-overlay-title="Toggle Control Center" { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
+    // Back with DMS, and the two bindings the Noctalia spell cost us: the
+    // process list needs enableSystemMonitoring (set in nix/modules/home.nix),
+    // the notepad is built in and needs nothing.
+    Mod+M hotkey-overlay-title="Toggle Process List" { spawn "dms" "ipc" "processlist" "toggle"; }
+    Mod+P hotkey-overlay-title="Toggle Notepad" { spawn "dms" "ipc" "notepad" "toggle"; }
 
-    // Dropped with DMS, no Noctalia equivalent: Mod+M (process list) and
-    // Mod+P (notepad — Noctalia has notes only as a plugin, not installed here).
-
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-up" "3"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-down" "3"; }
-    XF86AudioMute allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
-    XF86AudioMicMute allow-when-locked=true { spawn "noctalia" "msg" "mic-mute"; }
-    // No step argument on purpose: the signature is `brightness-up [target] [step]`,
-    // so a lone number would be read as the TARGET monitor, not the step.
-    XF86MonBrightnessUp allow-when-locked=true { spawn "noctalia" "msg" "brightness-up"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "noctalia" "msg" "brightness-down"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "dms" "ipc" "audio" "increment" "3"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "dms" "ipc" "audio" "decrement" "3"; }
+    XF86AudioMute allow-when-locked=true { spawn "dms" "ipc" "audio" "mute"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "dms" "ipc" "audio" "micmute"; }
+    // The trailing "" is not a typo and not padding — it is the output argument,
+    // and the shell's own niri module passes it exactly like this. Omitting it
+    // makes the step the output name.
+    XF86MonBrightnessUp allow-when-locked=true { spawn "dms" "ipc" "brightness" "increment" "5" ""; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "dms" "ipc" "brightness" "decrement" "5" ""; }
     XF86TouchpadToggle allow-when-locked=true repeat=false { spawn "niri" "msg" "action" "toggle-touchpad"; }
 
     // ─── Окна и приложения ───────────────────────────────────────────────
@@ -199,10 +215,47 @@ binds {
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
 }
-spawn-at-startup "noctalia"
-// Noctalia needs this to let notification actions and window activation work:
-// it activates windows with a serial the compositor considers stale, and without
-// the flag niri refuses the request.
+spawn-at-startup "dms" "run"
+
+// Kept from the Noctalia setup, where it was needed for notification actions and
+// window activation: a shell that activates a window with a serial niri calls
+// stale gets its request refused without this. DMS raises windows the same way
+// from its notifications and its process list, so the flag stays. Checked
+// against niri 26.04; harmless if the shell never needs it.
 debug {
     honor-xdg-activation-with-invalid-serial
 }
+
+// ── No `include` lines here, and that is a decision, not an omission ────────
+//
+// DMS keeps its generated kdl in ~/.config/niri/dms/ — colors, layout, alttab,
+// cursor, windowrules, wpblur, binds-next, binds, outputs — and each only takes
+// effect if this file includes it. Its home-manager module would write all of
+// them (includes.enable, default filesToInclude); it is off in
+// nix/modules/home.nix. None are granted here either, because every one of the
+// 2026-11-05 failures came in through this door:
+//
+//   outputs.kdl + its monitor profiles -> DP-3 pinned at x=3072 while the 4K was
+//       unplugged, a 3072 px phantom gap, remote mouse at 1920/4992 speed.
+//   input.kdl -> the shell regenerated it from its own keyboardOptions and set
+//       grp:win_space_toggle behind our back, so the layout flipped twice per
+//       press and looked dead. The fix is above: an empty xkb `options` plus the
+//       Mod+Space bind, which cannot be overridden by a file nobody includes.
+//
+// Monitors live in the `output` blocks above, keybinds in `binds` above. Both
+// are this file's, in the repo, under dotter.
+//
+// Two things to know rather than discover:
+//
+// 1. The shell can still append an include itself the first time its settings UI
+//    wants to own something. This file is a dotter SYMLINK into the repo, so
+//    that shows up as a diff in `git status` — visible and revertible, which is
+//    the entire reason niri stays at 26.04 (25.08 cannot parse `include` at all
+//    and would just kill the session). If a line appears: delete it, and change
+//    the setting that provoked it.
+// 2. Display profiles are applied over IPC, not through a file, so skipping the
+//    include does not by itself stop them. What does: `displayProfileAutoSelect`
+//    defaults to FALSE in 2.1.2 (checked in the shell's SettingsSpec, not
+//    assumed) — the auto-reapply that caused the phantom gap is off unless
+//    switched on. Verify on a live shell with `dms ipc outputs status`; the
+//    switch is `dms ipc outputs toggleAuto`. Leave it off.

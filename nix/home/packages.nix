@@ -61,16 +61,9 @@
     # so unlike Zen the three OSes are NOT in step on this one; nixpkgs lags.
     (pkgs.zed-editor.fhsWithPackages (_: [ ]))
 
-    # Noctalia — the desktop shell (bar, launcher, notifications, lock screen)
-    # that niri starts via spawn-at-startup. From unstable on purpose: 26.05 pins
-    # 5.0.1 while upstream is on 5.4.1, and the IPC surface these keybinds use
-    # (`noctalia msg panel-toggle ...`) was checked against 5.4.1.
-    #
-    # Replaced DankMaterialShell, which owned parts of niri's own config — its
-    # monitor profiles and its dms/input.kdl include were the direct cause of a
-    # crawling remote mouse and a dead layout toggle. Noctalia does not write to
-    # config.kdl and does not manage outputs; that stays niri's job.
-    pkgs.unstable.noctalia
+    # No shell package here on purpose. The desktop shell is DMS, and its
+    # home-manager module installs the package itself along with its services —
+    # see programs.dank-material-shell in modules/home.nix.
 
     # Standard GTK file manager.
     pkgs.nautilus

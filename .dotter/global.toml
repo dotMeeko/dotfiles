@@ -9,9 +9,20 @@
 # more direct: there is no OS detection to get wrong, the machine states what it
 # wants.
 #
-# Entries are SYMLINKS into this repo by default, so editing a file here takes
-# effect immediately with no deploy step. `type = "template"` generates a real
-# file instead, which is required wherever a value must not be committed.
+# Entries are SYMLINKS into this repo, so editing a file here takes effect
+# immediately with no deploy step. `type = "template"` generates a real file
+# instead, which is required wherever a value must not be committed.
+#
+# That first sentence is true only because of the [settings] block below.
+# dotter's OWN default is `automatic`, which decides per file by looking at its
+# CONTENTS: anything containing `{{` is treated as a handlebars template. Every
+# file here happened to be free of `{{`, so the difference stayed invisible
+# until linux/bin/niri-outputs-snapshot arrived with a python f-string that
+# writes a literal brace (`f"...{{"`) — dotter tried to render it and died on
+# "invalid handlebars syntax". Pinning the default makes the rule content-blind:
+# a file is a template when this file says so, never because of what is in it.
+[settings]
+default_target_type = "symbolic"
 
 [shared.files]
 "shared/bashrc" = "~/.bashrc"
@@ -43,26 +54,21 @@
 # itself a symlink to ../waynergy.service, which dotter resolves, so the unit
 # still exists exactly once.
 "linux/systemd/graphical-session.target.wants/waynergy.service" = "~/.config/systemd/user/graphical-session.target.wants/waynergy.service"
-# Noctalia's settings. Three things about this entry are not obvious:
-#
-# 1. The path is under .local/state, not .config. The docs say the config lives in
-#    ~/.config/noctalia/config.toml, but 5.3.0 leaves that directory empty and
-#    keeps everything the settings UI writes here instead.
-# 2. Only this ONE file is mapped. The same directory holds genuine runtime state
-#    that must never be committed — state.toml, usage_counts.json,
-#    recently_used.json, notification_history.json and clipboard/index.enc, which
-#    is clipboard history in a public repo's worth of trouble.
-# 3. Symlink, so the settings UI writes straight into the repo and tuning is
-#    tracked as it happens. Verified that Noctalia's own writes keep the symlink
-#    rather than replacing it with a plain file.
-#
-# Two things in the file DO rot, and knowingly: wallpaper.path is a /nix/store
-# path that changes with every noctalia version bump, and the lockscreen widget
-# keys are per-connector ("...@DP-3"). Neither breaks anything here; both would
-# need fixing up by hand on a machine with different monitors.
-"linux/noctalia/settings.toml" = "~/.local/state/noctalia/settings.toml"
-
+# NOT mapped: the shell's own settings (~/.config/dms/settings.json). Deliberate,
+# and the same call as under chezmoi. That file is one blob holding real settings
+# next to things that have no business in a public repo — per-connector bar
+# layouts, weather location, and whatever credentials its integrations collect —
+# and the shell rewrites it on every UI change. The Noctalia equivalent WAS
+# tracked here for a week; it mostly produced churn and a /nix/store path that
+# went stale on every version bump. If it should be tracked after all, map the
+# single file and read it through first.
 "linux/bin/waynergy-toggle" = "~/.local/bin/waynergy-toggle"
+# Prints the live monitor layout as KDL `output` blocks for niri/config.kdl.
+# Needed because every display change in this setup is runtime-only — the shell
+# applies them over IPC and niri never writes `niri msg output` back to disk —
+# so without this the repo and the desk drift apart silently. They already had:
+# the 4K ran at 144 Hz while config.kdl said 60.
+"linux/bin/niri-outputs-snapshot" = "~/.local/bin/niri-outputs-snapshot"
 "linux/applications/waynergy-toggle.desktop" = "~/.local/share/applications/waynergy-toggle.desktop"
 
 [windows.files]

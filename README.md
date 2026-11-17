@@ -17,9 +17,8 @@ shared/               dotfiles for every OS
   gitconfig           ~/.gitconfig (template; Windows bits gated on a variable)
   nvim/              Neovim — LazyVim (whole dir -> ~/.config/nvim; lazy-lock.json pinned)
 linux/                Linux-only dotfiles
-  niri/config.kdl     Niri compositor (incl. monitor modes and Noctalia keybinds)
+  niri/config.kdl     Niri compositor (incl. monitor modes and DMS keybinds)
   waynergy/           KVM client config (template) + Apple keycode table
-  noctalia/           shell settings (symlink; its UI writes straight into the repo)
   systemd/            waynergy user unit + its graphical-session enablement link
   bin/, applications/ waynergy-toggle and its desktop entry
 nix/                  NixOS (flake)
@@ -93,22 +92,32 @@ skip: everything else still deploys and only the keyboard/mouse sharing sits idl
   local keyboard for that one login, run `dotter`, and every login screen after it
   accepts the Mac's keyboard. The copy is guarded, so a missing config can never
   stop the greeter from starting.
-- **Desktop on Linux:** niri as the compositor, **Noctalia v5** as the shell (bar,
-  launcher, notifications, lock screen) and **noctalia-greeter** as the login
-  screen. It replaced DankMaterialShell, which owned parts of niri's own config —
-  its monitor profiles left a phantom gap in the layout that made the remote mouse
-  crawl, and its generated include silently overrode the keyboard layout toggle.
-  Noctalia writes nothing into the niri config, so monitors are configured in
-  `linux/niri/config.kdl` (mode and scale, deliberately without `position`).
-  Noctalia's settings are managed, but not where its docs say: 5.3.0 leaves
-  `~/.config/noctalia/` empty and writes everything to
-  `~/.local/state/noctalia/settings.toml`, so that single file is the one mapped —
-  as a symlink, so its settings UI writes into the repo directly. The rest of that
-  directory stays local on purpose: it is runtime state, and `clipboard/index.enc`
-  is clipboard history, which has no business in a public repo. Two values in the
-  managed file are knowingly machine-bound — the wallpaper path points into
-  `/nix/store` and so changes on every noctalia bump, and the lockscreen widget
-  keys carry a connector name (`...@DP-3`).
+- **Desktop on Linux:** niri as the compositor, **DMS — Dux Modular Shell** as the
+  shell (bar, launcher, notifications, process list, notepad, lock screen) and
+  **Dux Greeter** as the login screen. Both come from the upstream flakes
+  (`duxlabs-dev/dux-shell/stable`, `duxlabs-dev/dux-greeter`), not nixpkgs, which
+  still carries the 1.4.x line under the old `dms-shell` name. The project was
+  DankMaterialShell until 2.0 (2026-10-20); the Nix attributes and options kept
+  the old names — `homeModules.dank-material-shell`,
+  `programs.dank-material-shell`, `programs.dms-greeter` — and that mismatch is
+  upstream's, not a mistake here.
+- **The shell gets no say over the niri config, and that is the whole
+  arrangement.** A week on Noctalia bought exactly this lesson: the three failures
+  of 2026-11-05 — a phantom gap in the monitor layout that made the remote mouse
+  crawl, a dead keyboard-layout toggle, a drifting `include` line — all came from
+  DMS owning pieces of `config.kdl` through its generated `dms/*.kdl` files.
+  Swapping shells was the expensive way to fix that; not granting the includes is
+  the cheap one. So: `includes.enable = false` in `nix/modules/home.nix`, no
+  `include` line in `linux/niri/config.kdl`, monitors and keybinds written by hand
+  in that file, and the shell's display auto-apply left off (it defaults off in
+  2.1.2). Cost of the arrangement, paid knowingly: no wallpaper-derived colours or
+  layout sync into niri's focus ring. Both files say this at the point where it
+  matters.
+- **The shell's own settings are not tracked** (`~/.config/dms/settings.json`). It
+  is one blob mixing real settings with per-connector layouts, a weather location
+  and whatever its integrations collect, rewritten on every click. The Noctalia
+  equivalent was tracked for a week and mostly produced churn plus a `/nix/store`
+  path that went stale on every bump.
 - **Why dotter and not chezmoi:** chezmoi derives each target path from the source
   *filename* (`dot_config/...`), which is not configurable — upstream closed that
   request as wontfix. dotter keeps the repo layout free and writes the mapping out

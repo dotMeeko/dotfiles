@@ -6,7 +6,7 @@
 # waynergy.service IS enabled at login (symlinked into graphical-session.target.wants),
 # so sharing starts with the session and this script turns it off and back on.
 #
-# Feedback goes through DankMaterialShell's own notification IPC; notify-send is
+# Feedback goes through DMS's own notification IPC; notify-send is
 # not installed on this system.
 set -euo pipefail
 

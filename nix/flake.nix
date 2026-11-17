@@ -16,20 +16,37 @@
     };
     # Niri compositor via niri-flake (nixos session + home-manager config/lib).
     niri.url = "github:sodiboo/niri-flake";
-    # Noctalia Greeter — greetd login screen for the Noctalia shell.
+    # Dux Modular Shell (DMS) — Quickshell desktop shell over Niri.
     #
-    # From the upstream flake, not nixpkgs: the pinned nixos-26.05 has no
-    # noctalia-greeter module at all (checked — display-managers/ there ships
-    # dms-greeter, gdm, sddm and friends, but not this one). Their module also
-    # already carries the fix for the NixOS session-discovery bug, prefixing the
-    # greetd command with XDG_DATA_DIRS, and it disables the nixpkgs copy of
-    # itself so the two can never both apply.
+    # Formerly DankMaterialShell: the project moved to the Dux Labs org with 2.0
+    # (2026-10-20) and `github:AvengeMedia/DankMaterialShell` is gone. The NAMES
+    # inside did not move with it, and that mismatch is permanent — the flake
+    # exposes `homeModules.dank-material-shell` and the options still live under
+    # `programs.dank-material-shell`, with `dankMaterialShell` kept as a warning
+    # alias. Checked against the stable branch, not assumed.
     #
-    # The shell itself needs no module — it is one binary plus its own TOML, and
-    # comes from pkgs.unstable (see home/packages.nix) because nixpkgs-26.05 is
-    # four minor versions behind.
-    noctalia-greeter = {
-      url = "github:noctalia-dev/noctalia-greeter";
+    # The /stable branch on purpose: it tracks releases (currently 2.1.2,
+    # 2026-11-08), while master is explicitly not recommended for daily use.
+    #
+    # NOT from nixpkgs: stable 26.05 pins `dms-shell` 1.4.6 and its
+    # `programs.dms-shell` module is written for that 1.4.x line, while unstable
+    # already ships `dux-shell` 2.1.2 — mixing the stable module with the
+    # unstable package is version skew waiting to happen. The upstream flake
+    # ships module and package as one piece.
+    dux-shell = {
+      url = "github:duxlabs-dev/dux-shell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Dux Greeter — greetd login screen in the DMS style (Material 3, theme-synced).
+    #
+    # Its own repo as of 2.x: the shell flake's `nixosModules.greeter` is now an
+    # empty stub that only prints "the greeter moved to the dux-greeter repo".
+    # The module here still defines `programs.dms-greeter` (NOT
+    # services.displayManager.*), and it still reads
+    # /etc/greetd/niri_overrides.kdl — both verified in the flake source, since
+    # modules/desktop-niri.nix depends on each.
+    dux-greeter = {
+      url = "github:duxlabs-dev/dux-greeter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Zen browser — not in nixpkgs; community flake. Package only (dotter owns configs).
