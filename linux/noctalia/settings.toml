@@ -1,6 +1,23 @@
 config_version = 15
 
-[bar.default]
+[bar]
+order = [ "default" ]
+
+    [bar.default]
+    end = [
+        "media",
+        "tray",
+        "notifications",
+        "clipboard",
+        "network",
+        "bluetooth",
+        "volume",
+        "brightness",
+        "battery",
+        "control-center",
+        "session",
+        "bar"
+    ]
 
 [control_center.calendar]
 show_week_numbers = true
@@ -26,7 +43,7 @@ widget_order = [ "lockscreen-login-box@DP-2", "lockscreen-login-box@DP-3" ]
     box_height = 196.0
     box_width = 810.0
     cx = 1536.0
-    cy = 1546.0
+    cy = 1545.9998779296875
     output = "DP-2"
     placement_height = 1728.0
     placement_width = 3072.0
@@ -78,6 +95,9 @@ widget_order = [ "lockscreen-login-box@DP-2", "lockscreen-login-box@DP-3" ]
         show_unlock_hint = true
         show_weather = true
 
+[plugins]
+enabled = [ "raycursive/niri-displays" ]
+
 [shell.screen_corners]
 enabled = true
 
@@ -93,3 +113,6 @@ path = "/nix/store/7xnm0ac94ykcxl0qq7jbyipiyx0xz5wr-noctalia-5.3.0/share/noctali
 
 [wallpaper.last]
 path = "/nix/store/7xnm0ac94ykcxl0qq7jbyipiyx0xz5wr-noctalia-5.3.0/share/noctalia/assets/noctalia-wallpaper.png"
+
+[widget.bar]
+type = "raycursive/niri-displays:bar"
