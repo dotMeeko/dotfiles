@@ -39,6 +39,28 @@
     pkgs.nixfmt
     pkgs.statix
 
+    # Zed — the GUI editor, alongside Neovim rather than instead of it.
+    #
+    # The FHS-wrapped variant, not plain `pkgs.zed-editor`, and that is the whole
+    # point of the line: Zed downloads prebuilt language servers itself at runtime
+    # (rust-analyzer and friends), and on NixOS those ELFs find no dynamic loader.
+    # nixpkgs ships this wrapper for exactly that case — its own description says
+    # it "should allow for easy usage of extensions without nix-specific
+    # modifications". Plain zed-editor starts fine but breaks on the first
+    # downloaded server. Same problem mason.nvim has, different fix: Neovim can be
+    # fed servers from Nix, Zed insists on fetching its own.
+    #
+    # The command is `zeditor`, NOT `zed`. The upstream .desktop entry calls a bare
+    # `zeditor` (not an absolute store path), so the launcher resolves it to this
+    # wrapper and there is no reason to install both variants.
+    #
+    # Auto-updates are disabled by the package itself (it sets
+    # ZED_UPDATE_EXPLANATION); version bumps come from `nix flake update`. Stable
+    # 26.05 has 1.25.3 while the locked unstable has 1.25.2 — older — so the
+    # unstable overlay buys nothing here. Homebrew and winget both carry 1.28.1,
+    # so unlike Zen the three OSes are NOT in step on this one; nixpkgs lags.
+    (pkgs.zed-editor.fhsWithPackages (_: [ ]))
+
     # Noctalia — the desktop shell (bar, launcher, notifications, lock screen)
     # that niri starts via spawn-at-startup. From unstable on purpose: 26.05 pins
     # 5.0.1 while upstream is on 5.4.1, and the IPC surface these keybinds use
@@ -91,5 +113,12 @@
     # Zen browser — "beta" is Zen's public release channel (NOT a pre-release; twilight is the
     # nightly). Package only (no programs.*), so dotter keeps owning the config.
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta
+
+    # Google Chrome — the stable channel (nixpkgs has no beta/dev attribute for
+    # it; `google-chrome` IS stable, 151.0.7922.71 in the locked 26.05). Unfree,
+    # so it also needs an entry in allowUnfreePredicate (modules/gpu-nvidia.nix).
+    # Second browser alongside Zen, not a replacement. Package only (no
+    # programs.*), same as every other entry here.
+    pkgs.google-chrome
   ];
 }

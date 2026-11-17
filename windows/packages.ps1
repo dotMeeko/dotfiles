@@ -25,6 +25,16 @@ $packages = @(
 
     # GUI
     'Zen-Team.Zen-Browser',         # same browser as on NixOS
+    # GUI editor, same as on the other two OSes. Publisher is ZedIndustries, NOT
+    # "Zed" — manifests/z/Zed does not exist in winget-pkgs. winget also carries a
+    # "Preview" version under the same id, which is Zed's preview channel; the
+    # numbered releases are the stable ones.
+    'ZedIndustries.Zed',
+    # Docker for development. Needs WSL2 present first — Desktop runs its engine
+    # inside it; `wsl --install` if it is not there yet. winget also has
+    # Docker.DockerCLI / Docker.DockerCompose as standalone pieces and
+    # Docker.DockerDesktopEdge as the preview channel; this is the stable app.
+    'Docker.DockerDesktop',
     'Anthropic.ClaudeCode'
 )
 

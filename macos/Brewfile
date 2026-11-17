@@ -16,6 +16,26 @@ brew "jq"
 cask "firefox"
 cask "ghostty"
 
+# Zed — GUI editor, same as on the other two OSes. Cask token is "zed"; the
+# separate "zed@preview" cask is the preview channel, not wanted here.
+#
+# Not version-matched with NixOS on purpose: this cask is 1.28.1 while nixpkgs
+# 26.05 pins 1.25.3. Nothing in the setup depends on them being equal (unlike
+# Zen, where the pinned release is deliberately the same everywhere), and
+# Homebrew cannot pin a cask version anyway.
+cask "zed"
+
+# Docker for development. The cask is "docker-desktop" — the plain "docker" cask
+# no longer exists (checked: 404), it was renamed when the CLI-only formula and
+# the Desktop app were split apart.
+#
+# Unlike NixOS this is a full VM with a GUI, because macOS has no containers of
+# its own; nothing else is possible without one. Licence note: Docker Desktop is
+# free for personal use but paid above Docker's company-size threshold. If that
+# ever applies, the replacement is `brew "colima"` (a formula, not a cask) plus
+# `brew "docker"` for the CLI — same `docker` commands, no Desktop.
+cask "docker-desktop"
+
 # Zen — the same browser the other two OSes get, so all three stay in step:
 # cask 1.24.1b here, Zen-Team.Zen-Browser 1.24.1b on winget, and the flake in
 # nix/home/packages.nix pins the same release.

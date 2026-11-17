@@ -10,6 +10,7 @@
       ../../modules/desktop-niri.nix
       ../../modules/gpu-nvidia.nix
       ../../modules/snapshots.nix
+      ../../modules/docker.nix
     ]
     ++ lib.optional (builtins.pathExists ./hardware-configuration.nix) ./hardware-configuration.nix
     ++ lib.optional (builtins.pathExists ./machine.nix) ./machine.nix

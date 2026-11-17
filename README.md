@@ -26,7 +26,7 @@ nix/                  NixOS (flake)
   flake.nix           hybrid: stable nixos-26.05 + nixpkgs-unstable overlay
   hosts/desktop/      per-role config (+ disko.nix: LUKS+Btrfs)
   disko/main.nix      reusable disk layout (LUKS + Btrfs)
-  modules/            base system, Niri desktop, NVIDIA GPU
+  modules/            base system, Niri desktop, NVIDIA GPU, snapshots, docker
   home/packages.nix   home-manager: home.packages only
   pkgs/               packages missing from nixpkgs, pinned by release hash
   bootstrap/install-nixos.sh   guided installer (disk pick + confirm)

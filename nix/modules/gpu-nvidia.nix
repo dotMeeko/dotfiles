@@ -2,7 +2,8 @@
 # so the dGPU drives the display directly (no iGPU offload).
 { config, lib, ... }:
 {
-  # Allow only specific unfree packages, not everything: the NVIDIA driver and Claude Code.
+  # Allow only specific unfree packages, not everything: the NVIDIA driver,
+  # Claude Code and Google Chrome (home/packages.nix).
   nixpkgs.config.allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
@@ -10,6 +11,7 @@
       "nvidia-settings"
       "nvidia-persistenced"
       "claude-code"
+      "google-chrome"
     ];
 
   services.xserver.videoDrivers = [ "nvidia" ];
