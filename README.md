@@ -86,6 +86,13 @@ skip: everything else still deploys and only the keyboard/mouse sharing sits idl
   approve a capture, so the RemoteDesktop portal cannot work there and no
   portal-based client — Synergy 3 included — can ever type at the login prompt.
   Client config: `linux/waynergy/`. Greeter wiring: `nix/modules/desktop-niri.nix`.
+- **Point the client at the Mac by name, not by IP.** `deskflow-host
+  <LocalHostName>.local` writes the address into `.dotter/local.toml` and
+  re-renders the client config in one step. A name is resolved on every
+  connection attempt (avahi/mDNS here, mDNSResponder on the Mac), so a new DHCP
+  lease costs one reconnect; an IP in there silently rots into
+  `connect: No route to host`, at the login screen as well. Run it again after a
+  macOS reinstall, which is when the computer name itself changes.
 - **Order on a brand-new machine matters for the login screen.** greetd copies
   the waynergy config out of `~/.config/waynergy`, which does not exist until
   `dotter` has run once — so the *first* login screen has no remote input. Keep a

@@ -12,9 +12,20 @@
 packages = ["shared", "linux"]
 
 [variables]
-# Address of the Mac running the Deskflow server, used by linux/waynergy/config.ini.
-# Leave it empty on a machine that does not share input: every other dotfile still
-# deploys, and only waynergy sits there retrying.
+# The Mac running the Deskflow server, used by linux/waynergy/config.ini.
+#
+# Use its mDNS NAME, not an IP: run `scutil --get LocalHostName` on the Mac and
+# append ".local" (e.g. "some-macbook-pro.local"). An IP is a DHCP lease and
+# moves, and when it does the client just logs "No route to host" until someone
+# notices; a name follows the Mac on its own, because waynergy resolves on every
+# connection attempt. Linux needs services.avahi for that (already on in
+# nix/modules/desktop-niri.nix); macOS answers for its own name out of the box.
+#
+# On a machine that is already deployed, `deskflow-host <name>.local` sets this
+# and re-renders the client config in one step.
+#
+# Leave it empty on a machine that does not share input: every other dotfile
+# still deploys, and only waynergy sits there retrying.
 deskflow_server = ""
 
 # Windows only — uncomment to turn on the autocrlf block in shared/gitconfig.

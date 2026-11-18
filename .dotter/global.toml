@@ -63,6 +63,11 @@ default_target_type = "symbolic"
 # went stale on every version bump. If it should be tracked after all, map the
 # single file and read it through first.
 "linux/bin/waynergy-toggle" = "~/.local/bin/waynergy-toggle"
+# Sets the Deskflow server address (in .dotter/local.toml) and re-renders the
+# waynergy template in one step. Exists because that address is a DHCP lease on a
+# Mac and the useful value is an mDNS name, which changes when macOS is
+# reinstalled — see the header of the script itself.
+"linux/bin/deskflow-host" = "~/.local/bin/deskflow-host"
 # Prints the live monitor layout as KDL `output` blocks for niri/config.kdl.
 # Needed because every display change in this setup is runtime-only — the shell
 # applies them over IPC and niri never writes `niri msg output` back to disk —

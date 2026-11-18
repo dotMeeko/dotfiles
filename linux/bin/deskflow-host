@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# Point this machine's waynergy client at the Mac running Deskflow — or show
+# where it points now.
+#
+#   deskflow-host                              show current address + client state
+#   deskflow-host devWladimirs-MacBook-Pro.local   set it
+#   deskflow-host 192.168.50.30                also accepted, see below
+#
+# WHY A SCRIPT AND NOT "JUST EDIT THE FILE"
+# The address lives in .dotter/local.toml, which is gitignored precisely so it
+# never lands in this public repo, and ~/.config/waynergy/config.ini is a dotter
+# TEMPLATE generated from it. So changing the address is three steps that have to
+# happen together: edit the variable, re-render the template, restart the client.
+# Done by hand, the re-render is the one that gets forgotten.
+#
+# PREFER THE mDNS NAME OVER AN IP
+# On the Mac: `scutil --get LocalHostName`, then append ".local". Avahi resolves
+# it (services.avahi in nix/modules/desktop-niri.nix) and waynergy calls
+# getaddrinfo on EVERY connection attempt — getaddrinfo sits in syn_connect, not
+# behind a cache — so a new DHCP lease costs one reconnect and nothing else.
+#
+# An IP has to be chased by hand instead, which is what happened on 2026-11-18:
+# the Mac moved from .209 to .30 and the client sat there logging
+# "connect: No route to host", in the session AND at the login screen.
+#
+# A macOS reinstall is the case no IP can cover either, because the computer name
+# changes with it. That is this script's second reason to exist: one command to
+# follow the Mac to its new name.
+
+set -euo pipefail
+
+repo="${DOTFILES_REPO:-$HOME/.dotfiles}"
+local_toml="$repo/.dotter/local.toml"
+unit=waynergy.service
+
+die() {
+	echo "$*" >&2
+	exit 1
+}
+
+# Feedback goes through DMS's notification IPC; notify-send is not installed.
+notify() {
+	if command -v dms >/dev/null 2>&1; then
+		dms ipc notif send "Keyboard sharing" "$1" >/dev/null 2>&1 || true
+	fi
+	echo "$1"
+}
+
+current() { sed -n 's/^deskflow_server = "\(.*\)"$/\1/p' "$local_toml"; }
+
+[ -f "$local_toml" ] ||
+	die "No $local_toml — copy .dotter/local.toml.example to it first."
+
+if [ $# -eq 0 ]; then
+	host=$(current)
+	echo "server:   ${host:-(unset)}"
+	# ahosts, not hosts: `getent hosts <ip>` is a REVERSE lookup and comes back
+	# empty for an address with no PTR, which reads as "broken" when it is not.
+	# ahosts is the forward path, i.e. the same getaddrinfo waynergy itself calls.
+	if [ -n "$host" ]; then
+		# `|| true` because a name that does not resolve exits 2, and under
+		# `set -e -o pipefail` that would kill the script instead of printing why.
+		addrs=$(getent ahosts "$host" | awk '$2 == "STREAM" { print $1 }' | paste -sd, - || true)
+		echo "resolves: ${addrs:-(no answer)}"
+	fi
+	echo "client:   $(systemctl --user is-active "$unit") ($(systemctl --user is-enabled "$unit"))"
+	exit 0
+fi
+
+[ $# -eq 1 ] || die "Usage: ${0##*/} [<hostname>.local | <ip>]"
+new="$1"
+
+# Hostnames and IPs only. This also keeps the value safe to hand to sed below.
+[[ "$new" =~ ^[A-Za-z0-9._-]+$ ]] || die "Not a hostname or IP: $new"
+
+# A dead name is still worth writing — the Mac may simply be asleep, and waynergy
+# retries every second forever — so this warns and continues rather than failing.
+if ! getent ahosts "$new" >/dev/null 2>&1; then
+	echo "warning: $new does not resolve right now." >&2
+	echo "         Mac asleep is fine (waynergy keeps retrying). A typo is not:" >&2
+	echo "         check the name with 'scutil --get LocalHostName' on the Mac," >&2
+	echo "         and that avahi is up here ('systemctl status avahi-daemon')." >&2
+fi
+
+if grep -q '^deskflow_server = ' "$local_toml"; then
+	sed -i "s|^deskflow_server = .*|deskflow_server = \"$new\"|" "$local_toml"
+elif grep -q '^\[variables\]' "$local_toml"; then
+	sed -i "/^\[variables\]/a deskflow_server = \"$new\"" "$local_toml"
+else
+	printf '\n[variables]\ndeskflow_server = "%s"\n' "$new" >>"$local_toml"
+fi
+
+# Re-render the template. dotter insists on running from the repo root.
+(cd "$repo" && dotter) || die "dotter failed; $local_toml now says $(current)"
+
+# Restart only a client that is already running: waynergy-toggle stopping it is a
+# deliberate "off", and this script has no business switching sharing back on.
+if systemctl --user is-active --quiet "$unit"; then
+	systemctl --user restart "$unit"
+	sleep 3
+	if journalctl --user -u "$unit" --since "10 seconds ago" |
+		grep -q "Connected as client"; then
+		notify "Server set to $new — connected."
+	else
+		notify "Server set to $new, but no connection yet. Check: journalctl --user -u $unit -n 20"
+	fi
+else
+	echo "Server set to $new. Client is stopped — waynergy-toggle starts it."
+fi
+
+# The login screen reads its own copy, made by greetd's preStart at every start
+# (nix/modules/desktop-niri.nix), so it follows this on the next boot. Restarting
+# greetd from inside a running session would kill the session.
+echo "Login screen picks this up on the next boot."

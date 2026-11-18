@@ -99,6 +99,37 @@ in
   # the greeter too — so the Mac's keyboard reaches the password prompt.
   hardware.uinput.enable = true;
 
+  # mDNS resolution, so the client can be pointed at the Mac BY NAME
+  # ("<LocalHostName>.local") instead of by IP.
+  #
+  # The IP is a DHCP lease and moves: on 2026-11-18 the Mac went from .209 to .30
+  # and waynergy sat logging "connect: No route to host" — in the session and at
+  # the login screen alike, since the greeter reads a copy of the same config.
+  # Nothing detects that for you, and the symptom looks like a broken client.
+  #
+  # A name survives it without help, because waynergy resolves on EVERY
+  # connection attempt (getaddrinfo lives in syn_connect, src/net.c, not behind a
+  # cache), so a new lease costs exactly one reconnect. macOS answers for its own
+  # name through mDNSResponder with nothing to configure on that side.
+  #
+  # A DHCP reservation on the router is NOT the equivalent fix here: this Mac is
+  # on Wi-Fi with a private (randomised) address — b2:10:e7:67:2b:3d, the
+  # locally-administered bit set — so a MAC-keyed reservation holds only until
+  # Apple rotates it.
+  #
+  # nssmdns4 is what puts mdns4_minimal into nsswitch.conf, i.e. it is the part
+  # that makes getent/getaddrinfo answer and therefore the part waynergy needs.
+  # System-wide, so the greeter's copy resolves too. publish stays off — nothing
+  # here needs announcing, only looking up. openFirewall defaults to true.
+  #
+  # Startup order needs no handling: if avahi is not up yet when the greeter's
+  # waynergy starts, the lookup fails, it retries a second later, and by then it
+  # is up.
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+  };
+
   # ── Keyboard and mouse BEFORE login ───────────────────────────────────────
   #
   # The same waynergy+uinput path as the session, but running inside the
