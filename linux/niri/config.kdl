@@ -121,9 +121,10 @@ binds {
     Super+Alt+L hotkey-overlay-title="Toggle Lock Screen" { spawn "dms" "ipc" "lock" "lock"; }
     Mod+Alt+N allow-when-locked=true hotkey-overlay-title="Toggle Night Mode" { spawn "dms" "ipc" "night" "toggle"; }
 
-    // Back with DMS, and the two bindings the Noctalia spell cost us: the
-    // process list needs enableSystemMonitoring (set in nix/modules/home.nix),
-    // the notepad is built in and needs nothing.
+    // Back with DMS, and the two bindings the Noctalia spell cost us. Both are
+    // built into the shell itself: the process list is served by its embedded
+    // dgop library — enableSystemMonitoring is deliberately NOT set, see the
+    // trace in nix/modules/home.nix — and the notepad needs nothing either.
     Mod+M hotkey-overlay-title="Toggle Process List" { spawn "dms" "ipc" "processlist" "toggle"; }
     Mod+P hotkey-overlay-title="Toggle Notepad" { spawn "dms" "ipc" "notepad" "toggle"; }
 
@@ -138,14 +139,14 @@ binds {
     XF86MonBrightnessDown allow-when-locked=true { spawn "dms" "ipc" "brightness" "decrement" "5" ""; }
     XF86TouchpadToggle allow-when-locked=true repeat=false { spawn "niri" "msg" "action" "toggle-touchpad"; }
 
-    // ─── Окна и приложения ───────────────────────────────────────────────
+    // ─── Windows and applications ────────────────────────────────────────
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "ghostty"; }
     Mod+Q hotkey-overlay-title="Close Window" { close-window; }
     Mod+Shift+Slash hotkey-overlay-title="Show Hotkey Overlay" { show-hotkey-overlay; }
     Mod+Shift+E hotkey-overlay-title="Quit niri" { quit; }
 
-    // ─── Фокус ───────────────────────────────────────────────────────────
-    // niri колоночный: H/L ходят между колонками, J/K — между окнами внутри колонки.
+    // ─── Focus ───────────────────────────────────────────────────────────
+    // niri is column-based: H/L walk between columns, J/K between windows inside one.
     Mod+H { focus-column-left; }
     Mod+L { focus-column-right; }
     Mod+J { focus-window-down; }
@@ -157,7 +158,7 @@ binds {
     Mod+Home { focus-column-first; }
     Mod+End  { focus-column-last; }
 
-    // ─── Перемещение ─────────────────────────────────────────────────────
+    // ─── Moving windows and columns ──────────────────────────────────────
     Mod+Shift+H { move-column-left; }
     Mod+Shift+L { move-column-right; }
     Mod+Shift+J { move-window-down; }
@@ -167,7 +168,7 @@ binds {
     Mod+Shift+Down  { move-window-down; }
     Mod+Shift+Up    { move-window-up; }
 
-    // ─── Размеры и структура колонок ─────────────────────────────────────
+    // ─── Column size and structure ───────────────────────────────────────
     Mod+R hotkey-overlay-title="Cycle Column Width" { switch-preset-column-width; }
     Mod+F hotkey-overlay-title="Maximize Column" { maximize-column; }
     Mod+Shift+F hotkey-overlay-title="Fullscreen" { fullscreen-window; }
@@ -177,7 +178,7 @@ binds {
     Mod+BracketLeft  hotkey-overlay-title="Consume/Expel Left" { consume-or-expel-window-left; }
     Mod+BracketRight hotkey-overlay-title="Consume/Expel Right" { consume-or-expel-window-right; }
 
-    // ─── Воркспейсы ──────────────────────────────────────────────────────
+    // ─── Workspaces ──────────────────────────────────────────────────────
     Mod+U { focus-workspace-down; }
     Mod+I { focus-workspace-up; }
     Mod+1 { focus-workspace 1; }
@@ -199,18 +200,18 @@ binds {
     Mod+Shift+8 { move-column-to-workspace 8; }
     Mod+Shift+9 { move-column-to-workspace 9; }
 
-    // ─── Мониторы (DP-2 + DP-3) ──────────────────────────────────────────
+    // ─── Monitors (DP-2 + DP-3) ──────────────────────────────────────────
     Mod+Ctrl+H { focus-monitor-left; }
     Mod+Ctrl+L { focus-monitor-right; }
     Mod+Ctrl+Shift+H { move-column-to-monitor-left; }
     Mod+Ctrl+Shift+L { move-column-to-monitor-right; }
 
-    // ─── Floating и оверврю ──────────────────────────────────────────────
+    // ─── Floating and overview ───────────────────────────────────────────
     Mod+Shift+Space hotkey-overlay-title="Toggle Floating" { toggle-window-floating; }
     Mod+Ctrl+Space hotkey-overlay-title="Floating/Tiling Focus" { switch-focus-between-floating-and-tiling; }
     Mod+O hotkey-overlay-title="Toggle Overview" { toggle-overview; }
 
-    // ─── Скриншоты ───────────────────────────────────────────────────────
+    // ─── Screenshots ─────────────────────────────────────────────────────
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }

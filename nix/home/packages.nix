@@ -19,6 +19,9 @@
     # Pickers and the grep/files sources behind <leader><space> and <leader>sg.
     pkgs.ripgrep
     pkgs.fd
+    # The Brewfile and windows/packages.ps1 both carry fzf as part of the shared
+    # CLI set; this was the one OS missing it.
+    pkgs.fzf
     # <leader>gg opens this.
     pkgs.lazygit
 

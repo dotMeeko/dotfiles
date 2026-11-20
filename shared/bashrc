@@ -23,5 +23,12 @@ if command -v nvim >/dev/null 2>&1; then
   export VISUAL=nvim
 fi
 
+# ~/.local/bin on PATH — user-installed tools; linux/bin scripts deploy there too.
+case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac
+
+# Machine-local additions that have no place in a public repo (private paths,
+# per-box workarounds). Not managed by dotter; absent on most machines.
+[ -f "$HOME/.bashrc.local" ] && . "$HOME/.bashrc.local"
+
 # Simple prompt
 PS1='\u@\h:\w\$ '

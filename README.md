@@ -23,8 +23,8 @@ linux/                Linux-only dotfiles
   bin/, applications/ waynergy-toggle and its desktop entry
 nix/                  NixOS (flake)
   flake.nix           hybrid: stable nixos-26.05 + nixpkgs-unstable overlay
-  hosts/desktop/      per-role config (+ disko.nix: LUKS+Btrfs)
-  disko/main.nix      reusable disk layout (LUKS + Btrfs)
+  hosts/desktop/      per-role config (+ generated machine/user/disko/hardware bits)
+  disko/main.nix      reusable disk layout (Btrfs, optional LUKS)
   modules/            base system, Niri desktop, NVIDIA GPU, snapshots, docker
   home/packages.nix   home-manager: home.packages only
   pkgs/               packages missing from nixpkgs, pinned by release hash
@@ -48,9 +48,10 @@ without committing it.
 ```sh
 git clone https://github.com/dotMeeko/dotfiles.git && cd dotfiles
 ./install.sh
-# asks: build (desktop), machine name, password, target disk (confirm by name),
-# then partitions LUKS+Btrfs via disko and runs nixos-install. User `meeko` is fixed
-# in the flake; the machine name is yours to pick (no hardcode). Reboot afterwards.
+# asks: build (desktop), machine name, user name, password, encrypt? (y/N),
+# target disk (confirm by name) — then partitions Btrfs (+ LUKS if chosen) via
+# disko and runs nixos-install. Nothing is hardcoded: machine name, user and disk
+# layout are generated into nix/hosts/<role>/. Reboot afterwards.
 ```
 
 Then, on any OS, lay down the dotfiles from the repo root:
@@ -74,7 +75,9 @@ skip: everything else still deploys and only the keyboard/mouse sharing sits idl
 
 ## Notes
 
-- Disk is encrypted: **LUKS + Btrfs** (subvolumes `@root` `@home` `@nix` `@log`).
+- Disk layout: **Btrfs** (subvolumes `@` `@home` `@nix` `@snapshots` `@log`),
+  optionally wrapped in **LUKS** — the installer asks; encryption costs a separate
+  disk password at every boot.
 - The user password hash is written to the installed machine
   (`/etc/secrets/user-password`), never stored in this repo.
 - The installer shows every disk with model/size and refuses to wipe one unless
