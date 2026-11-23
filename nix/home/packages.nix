@@ -116,5 +116,17 @@
     # Second browser alongside Zen, not a replacement. Package only (no
     # programs.*), same as every other entry here.
     pkgs.google-chrome
+
+    # Messengers. Discord is the official client (unfree — listed in
+    # allowUnfreePredicate, modules/gpu-nvidia.nix). Screen sharing under
+    # Wayland/niri is known-poor in it; if that ever matters, vesktop is the
+    # usual fix. Telegram is the official Qt client.
+    pkgs.discord
+    pkgs.telegram-desktop
+
+    # WhatsApp has NO official Linux client (Windows/macOS/web only), so this
+    # is a wrapper around WhatsApp Web. zapzap is what stable 26.05 carries —
+    # whatsapp-for-linux/wasistlos is not in this release.
+    pkgs.zapzap
   ];
 }

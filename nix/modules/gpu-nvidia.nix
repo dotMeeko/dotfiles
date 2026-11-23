@@ -3,7 +3,7 @@
 { config, lib, ... }:
 {
   # Allow only specific unfree packages, not everything: the NVIDIA driver,
-  # Claude Code and Google Chrome (home/packages.nix).
+  # Claude Code, Google Chrome and Discord (home/packages.nix).
   nixpkgs.config.allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
@@ -12,6 +12,7 @@
       "nvidia-persistenced"
       "claude-code"
       "google-chrome"
+      "discord"
     ];
 
   services.xserver.videoDrivers = [ "nvidia" ];

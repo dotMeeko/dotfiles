@@ -73,6 +73,19 @@ skip: everything else still deploys and only the keyboard/mouse sharing sits idl
   Mode on or from an elevated shell — the Windows package deploys its one file as
   a template for that reason, and any entry can be switched the same way.
 
+## Rebuild (NixOS)
+
+Anything under `nix/` takes effect only after a rebuild. One flake output per
+**role** (`nix/hosts/`); the only role so far is `desktop`:
+
+```sh
+sudo nixos-rebuild switch --flake ~/.dotfiles/nix#desktop
+```
+
+Swap `switch` for `boot` to apply on the next reboot instead, or `test` to try
+a build that does not survive one. `nix flake update` (run inside `nix/`) bumps
+the pinned inputs; the rebuild picks them up.
+
 ## Notes
 
 - Disk layout: **Btrfs** (subvolumes `@` `@home` `@nix` `@snapshots` `@log`),
