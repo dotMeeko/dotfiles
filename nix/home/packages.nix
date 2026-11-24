@@ -24,6 +24,10 @@
     pkgs.fzf
     # <leader>gg opens this.
     pkgs.lazygit
+    # GitHub CLI — PRs/issues/releases from the terminal, and the auth it stores
+    # doubles as the git credential helper for HTTPS remotes (`gh auth login`,
+    # then `gh auth setup-git`).
+    pkgs.gh
 
     # Language servers, formatters and linters. These come from Nix rather than
     # mason.nvim, which is disabled on NixOS — it downloads FHS binaries that
@@ -118,10 +122,21 @@
     pkgs.google-chrome
 
     # Messengers. Discord is the official client (unfree — listed in
-    # allowUnfreePredicate, modules/gpu-nvidia.nix). Screen sharing under
-    # Wayland/niri is known-poor in it; if that ever matters, vesktop is the
-    # usual fix. Telegram is the official Qt client.
-    pkgs.discord
+    # allowUnfreePredicate, modules/gpu-nvidia.nix). Since Jan 2025 it screen
+    # shares on Wayland, audio included, via xdg-desktop-portal + PipeWire —
+    # both already provided here by the niri module (xdg-desktop-portal-gnome),
+    # so no vesktop needed. Telegram is the official Qt client.
+    #
+    # Native Wayland instead of the default X11/xwayland-satellite path — that
+    # extra copy is a known source of janky stream playback under niri.
+    # WebRTCPipeWireCapturer makes the Chromium capturer go through the portal
+    # in native-Wayland mode (default-on in recent Chromium; pinned here since
+    # Discord's bundled Electron version is not verified). Decode stays
+    # software either way: Discord's Electron does not do NVDEC/VAAPI on
+    # NVIDIA.
+    (pkgs.discord.override {
+      commandLineArgs = "--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations,WebRTCPipeWireCapturer";
+    })
     pkgs.telegram-desktop
 
     # WhatsApp has NO official Linux client (Windows/macOS/web only), so this
